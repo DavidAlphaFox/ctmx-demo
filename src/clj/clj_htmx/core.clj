@@ -10,8 +10,10 @@
    :headers {"Content-Type" "text/html"}
    :body body})
 
-(defn html-response-snippet [body]
-  (-> body hiccup/html html-response))
+(defn snippet-response [body]
+  (if body
+    (-> body hiccup/html html-response)
+    (no-content)))
 (defn html5-response [body]
   (->
     [:body
@@ -21,46 +23,39 @@
     html-response))
 
 (defn encode-endpoints [f]
-  (if (fn? f)
+  (if (and (seq? f) (= 'fn (first f)))
     (with-meta f {:endpoint (str "/" (gensym))})
     f))
 
+(defn- hx-attrs [endpoint]
+  {:hx-post endpoint :hx-swap "outerHTML"})
 (defn assoc-hx [form endpoint]
   (when (vector? form)
     (if (-> form second map?)
-      (assoc-in form [1 :hx-post] endpoint)
+      (update form 1 merge (hx-attrs endpoint))
       (vec
         (concat
-          (take 1 form) [{:hx-post endpoint}] (rest form))))))
+          (take 1 form) [(hx-attrs endpoint)] (rest form))))))
 
 (defn expand-form [f req]
-  (if (fn? f)
-    (assoc-hx (f req) (-> f meta :endpoint))
+  (if-let [endpoint (-> f meta :endpoint)]
+    (-> req f (assoc-hx endpoint))
     f))
 (defn expand-content [f req]
-  (walk/postwalk #(expand-form % req) f))
-
-(defn vec* [& forms]
-  (vec
-    (apply list* forms)))
-
-(defn wrap-f [f]
-  (fn [req]
-    (or
-      (some-> req f (assoc-hx (-> f meta :endpoint)) html-response-snippet)
-      (no-content))))
+  (walk/prewalk #(expand-form % req) f))
 
 (defn extract-subforms [f]
-  (cond
-    (fn? f)
-    [[(-> f meta :endpoint) {:post (wrap-f f)}]]
-    (coll? f)
-    (mapcat extract-subforms f)))
+  (if-let [endpoint (-> f meta :endpoint)]
+    (list*
+      [endpoint {:post `(fn [req#]
+                          (-> ~f (expand-content req#) snippet-response))}]
+      (extract-subforms (drop 2 f)))
+    (when (coll? f)
+      (mapcat extract-subforms f))))
 
-(defn make-routes [root f]
+(defmacro make-routes [root f]
   (let [encoded (walk/postwalk encode-endpoints f)]
-    (vec*
-      root
+    `[~root
       {:middleware []}
-      ["/" {:get (fn [req] (-> encoded (expand-content req) html5-response))}]
-      (extract-subforms encoded))))
+      ["/" {:get (fn [req#] (-> ~encoded (expand-content req#) html5-response))}]
+      ~@(extract-subforms encoded)]))

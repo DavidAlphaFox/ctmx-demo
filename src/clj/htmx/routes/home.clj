@@ -10,4 +10,6 @@
     [:div
      [:h2 "Click the number below"]
      (fn [req]
-       [:div (swap! a inc)])]))
+       [:form
+        (fn [req]
+          [:div (swap! a inc)])])]))

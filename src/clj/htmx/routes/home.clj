@@ -6,7 +6,7 @@
 
 (defn home-routes []
   (htmx/make-routes
-    ""
+    "/"
     [:div
      [:h2 "Click the number below"]
      (fn [req]

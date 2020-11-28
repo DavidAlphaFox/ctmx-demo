@@ -2,6 +2,7 @@
   (:require
     [htmx.middleware :as middleware]
     [htmx.layout :refer [error-page]]
+    [htmx.routes.cv :refer [cv-routes]]
     [htmx.routes.home :refer [home-routes]]
     [reitit.ring :as ring]
     [ring.middleware.content-type :refer [wrap-content-type]]
@@ -17,7 +18,8 @@
   :start
   (ring/ring-handler
     (ring/router
-      [(home-routes)])
+      [(home-routes)
+       (cv-routes)])
     (ring/routes
       (ring/create-resource-handler
         {:path "/"})

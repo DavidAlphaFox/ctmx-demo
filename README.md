@@ -4,21 +4,9 @@ generated using Luminus version "3.88"
 
 clj-htmx demonstrates how to generate powerful react-like web apps without any explicit serverside javascript.  It uses the frontend [htmx](https://htmx.org/) library which is only 9kb zipped.  Pages are fast and light.
 
-htmx is based on the observation that the `a` and `form` elements are special because they request to the server and replace the dom with whatever html is returned.  htmx enables all elements to behave in this way whenever they are marked by an `hx-post` attribute.
+htmx is based on the observation that the `a` and `form` elements are special because they request to the server and replace the dom with whatever html is returned.  htmx enables all elements to behave in this way whenever they are marked by `hx-*` attributes.
 
-Using clojure we can abstract a step further when we generate html on the backend.
-
-```clojure
-(def a (atom 0))
-
-[:div
-  [:h2 "Click the number below"]
-  (fn [req]
-    ;; db operations etc here
-    [:div (swap! a inc)])]
-```
-
-Anything that is wrapped inside a function becomes dynamic content.  clj-htmx automatically generates endpoints to update as needed.
+clj-htmx extends [hiccup](https://github.com/weavejester/hiccup) syntax to support htmx.  Simply place `:hx-get` `:hx-post` `:hx-put` `:hx-patch` `:hx-delete` functions within ordinary hiccup syntax.  The `htmx.core/make-routes` macro will move these functions into seperate endpoints and replace them with the associated url.
 
 ## Prerequisites
 

@@ -15,7 +15,8 @@
 
 (defn assign-endpoint [x]
   (if (and x (not (string? x)))
-    (with-meta x {:endpoint (str (gensym))})))
+    (with-meta x {:endpoint (str (gensym))})
+    x))
 (defn assign-endpoints [m]
   (if (map? m)
     (updates m assign-endpoint endpoints)

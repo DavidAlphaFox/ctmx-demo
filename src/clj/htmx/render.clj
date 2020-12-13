@@ -2,6 +2,7 @@
   (:require
     [hiccup.core :as hiccup]
     [hiccup.page :refer [html5]]
+    [htmx.util :as util]
     [ring.util.http-response :refer [no-content]]))
 
 (defn html-response [body]
@@ -34,7 +35,8 @@
        [:script {:src "https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
                  :integrity "sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
                  :crossorigin "anonymous"}]
-       [:script {:src "https://unpkg.com/htmx.org@0.4.0"}]])))
+       [:script {:src "https://unpkg.com/htmx.org@0.4.0"}]
+       [:script {:src "/js/helpers.js"}]])))
 
 (defn modal-large
   ([id title body] (modal-large id title body nil))
@@ -50,3 +52,22 @@
         [:span "&times;"]]]
       [:div.modal-body body]
       [:div.modal-footer footer]]]]))
+
+(defn input
+  ([type title]
+   (input type title title nil))
+  ([type title placeholder]
+   (input type title placeholder nil))
+  ([type title placeholder value]
+   [:div {:style "marginTop: 15px"}
+    [:label title]
+    [:input.form-control
+     (util/filter-vals
+       {:type type
+        :placeholder placeholder
+        :value value})]]))
+
+(def text (partial input "text"))
+(def email (partial input "email"))
+(def number (partial input "number"))
+(def password (partial input "password"))

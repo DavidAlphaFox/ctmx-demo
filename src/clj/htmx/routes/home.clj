@@ -13,7 +13,7 @@
       "Legal Role"
       [:div
        [:div {:data-toggle "tooltip" :title title-tooltip}
-        "hi"]])))
+        (render/text "Enter Title")]])))
 
 (defn form [req]
   [:form.mt-3
@@ -25,9 +25,6 @@
      :data-target "#newLegalRole"
      :title "Please add Legal Roles"}
     "Add"]])
-
-(defn update-div [_]
-  (snippet-response (swap! a inc)))
 
 (defn home-routes []
   (htmx/make-routes

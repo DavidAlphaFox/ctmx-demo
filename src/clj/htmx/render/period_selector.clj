@@ -37,38 +37,20 @@
                "December"))
 (def months-not-specified (conj months "Not Specified"))
 
-;; (defn period-selector []
-;;   [:div
-;;    [:div.row {:style "marginTop: 15px"}
-;;     (select "From Month" months-not-specified)
-;;     (input "From Year")]
-;;    [:div.row
-;;   <div>
-;;                 <div style={{marginTop: '15px'}} className="row">
-;;                     {this.select('From Month', notSpecifiedMonths, 'fromMonth', 'Select Month')}
-;;                     {this.input('number', 'From Year', 'fromYear', 'Enter Year')}
-;;                 </div>
-;;                 <div style={{marginTop: '15px'}} className="row">
-;;                     <div className="col">
-;;                         <label>To Month {this.requiredStar}</label>
-;;                         <input
-;;                             type="checkbox"
-;;                             checked={present || false}
-;;                             onChange={() => this.togglePresent()}
-;;                             className="form-check form-check-inline"
-;;                         />
-;;                         Present
-;;                         <select
-;;                             className="custom-select"
-;;                             value={toMonth}
-;;                             onChange={(e: SyntheticEvent<any>) => this.assocState('toMonth', e.currentTarget.value)}
-;;                             disabled={present}
-;;                         >
-;;                             <option value={-2}>Please Select</option>
-;;                             {notSpecifiedMonths.map((option, i) => <option value={i - 1} key={option}>{option}</option>)}
-;;                         </select>
-;;                         {this.error('toMonth', 'Select Month')}
-;;                     </div>
-;;                     {this.input('number', 'To Year', 'toYear', 'Enter Year', present)}
-;;                 </div>
-;;             </div>
+(defn period-selector []
+  [:div
+   [:div.row {:style "margin-top: 15px"}
+    (select "From Month" months-not-specified)
+    (input "From Year")]
+   [:div.row {:style "margin-top: 15px"}
+    [:div.col
+     [:label "To Month"]
+     [:input.form-check.form-check-inline {:type "checkbox"}]
+     "Present"
+     [:select.custom-select
+      [:option {:value "-2"} "Please Select"]
+      (map-indexed
+        (fn [i month]
+          [:option {:value (str (dec i))} month])
+        months-not-specified)]]
+    (input "To Year")]])

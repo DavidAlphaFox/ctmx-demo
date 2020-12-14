@@ -59,7 +59,7 @@
   ([type title placeholder]
    (input type title placeholder nil))
   ([type title placeholder value]
-   [:div {:style "marginTop: 15px"}
+   [:div {:style "margin-top: 15px"}
     [:label title]
     [:input.form-control
      (util/filter-vals
@@ -71,3 +71,11 @@
 (def email (partial input "email"))
 (def number (partial input "number"))
 (def password (partial input "password"))
+
+(defn binary-radio [label]
+  [:div {:style "margin-top: 15px"}
+   [:label label]
+   [:div.m-2
+    [:input {:type "radio"} "Yes"]]
+   [:div.m-2
+    [:input {:type "radio"} "No"]]])

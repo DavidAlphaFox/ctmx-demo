@@ -76,6 +76,12 @@
   [:div {:style "margin-top: 15px"}
    [:label label]
    [:div.m-2
-    [:input {:type "radio"} "Yes"]]
+    [:input {:type "radio"
+             :name "binary"
+             :value "true"
+             :hx-patch :form} "Yes"]]
    [:div.m-2
-    [:input {:type "radio"} "No"]]])
+    [:input {:type "radio"
+             :name "binary"
+             :value "false"
+             :hx-patch :form} "No"]]])

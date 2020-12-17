@@ -1,5 +1,6 @@
 (ns htmx.render.period-selector
   (:require
+    [clj-htmx.core :as htmx]
     [htmx.util :as util]))
 
 (defn- select
@@ -14,14 +15,13 @@
      (for [option options]
        [:option {:value option} option])]]))
 
-(defn- input [title]
+(defn- input [title disabled?]
   [:div.col
    [:label title]
    [:input.form-control
     {:type "text"
      :placeholder title
-     ;:value value
-     }]])
+     :disabled disabled?}]])
 
 (def months '("January"
                "February"
@@ -37,20 +37,30 @@
                "December"))
 (def months-not-specified (conj months "Not Specified"))
 
-(defn period-selector []
+(htmx/defcomponent to-row [req ^:boolean present]
+  [:div#to-row.row {:style "margin-top: 15px"}
+   [:div.col
+    [:label "To Month"]
+    [:input.form-check.form-check-inline.ml-2
+     {:type "checkbox"
+      :hx-patch "to-row"
+      :hx-target "#to-row"
+      :hx-swap "outerHTML"
+      :checked present
+      :name "present"}]
+    "Present"
+    [:select.custom-select
+     {:disabled present}
+     [:option {:value "-2"} "Please Select"]
+     (map-indexed
+       (fn [i month]
+         [:option {:value (str (dec i))} month])
+       months-not-specified)]]
+   (input "To Year" present)])
+
+(htmx/defcomponent period-selector [req]
   [:div
    [:div.row {:style "margin-top: 15px"}
     (select "From Month" months-not-specified)
-    (input "From Year")]
-   [:div.row {:style "margin-top: 15px"}
-    [:div.col
-     [:label "To Month"]
-     [:input.form-check.form-check-inline {:type "checkbox"}]
-     "Present"
-     [:select.custom-select
-      [:option {:value "-2"} "Please Select"]
-      (map-indexed
-        (fn [i month]
-          [:option {:value (str (dec i))} month])
-        months-not-specified)]]
-    (input "To Year")]])
+    (input "From Year" false)]
+   (to-row req false)])

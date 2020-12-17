@@ -23,17 +23,36 @@
     (coll? m) (mapcat extract-endpoints m)
     (component-macro? m) (-> m eval :endpoints)))
 
+(def parsers
+  {:int #(list 'Integer/parseInt %)
+   :lower #(list 'some-> % '.trim '.toLowerCase)
+   :trim #(list 'some-> % '.trim)
+   :string #(list 'or % "")
+   :boolean #(list 'contains? #{"true" "on"} %)})
+
+(defn sym->form [sym]
+  (when (symbol? sym)
+    (some (fn [[k f]]
+            (when (-> sym meta k)
+              (f sym)))
+          parsers)))
+
 ;; args takes the form req followed by params
-(defmacro defcomponent [name args body]
+(defmacro defcomponent [name args & body]
   (let [expanded (walk/postwalk expand-components body)
         f (gensym)
         req (first args)
         bindings (subvec args 1)]
     `(def ~name
        (let [~f (fn [~req]
-                  (let [{:keys ~bindings} (:params ~req)]
-                    (render/snippet-response ~expanded)))]
-         {:fn (fn ~args ~expanded)
+                  (let [{:keys ~bindings} (:params ~req)
+                        ~@(for [var bindings
+                                :let [form (sym->form var)]
+                                :when form
+                                x [var form]] x)]
+                    (render/snippet-response
+                      (do ~@expanded))))]
+         {:fn (fn ~args ~@expanded)
           :endpoints ~(vec
                         (conj
                           (extract-endpoints body)

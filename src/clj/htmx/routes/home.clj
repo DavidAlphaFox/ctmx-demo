@@ -13,14 +13,14 @@
     {:placeholder "Acting as lead lawyer, project management of corporate transactions, customer relationship management and supervision of junior staff."
      :rows "10"}]])
 
-(defn legal-role-body [req]
+(htmx/defcomponent legal-role-body [req]
   (let [title-tooltip "If you held multiple titles, please list the final / most senior position."
         subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."]
     [:div
      [:div {:data-toggle "tooltip" :title title-tooltip}
       (render/text "Job Title")]
      (render/text "Company Name")
-     (period-selector/period-selector)
+     (period-selector/period-selector req)
      (render/text "Location")
      [:div {:data-toggle "tooltip" :title subroles-tooltip}
       (render/binary-radio "Did your work involve multiple subroles?")

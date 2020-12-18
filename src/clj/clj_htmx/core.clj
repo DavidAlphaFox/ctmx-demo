@@ -18,9 +18,12 @@
     `(:fn ~x)
     x))
 
-(defn- extract-endpoints [m]
+(defn- mapmerge [f s]
+  (apply merge (map f s)))
+
+(defn extract-endpoints [m]
   (cond
-    (coll? m) (mapcat extract-endpoints m)
+    (coll? m) (mapmerge extract-endpoints m)
     (component-macro? m) (-> m eval :endpoints)))
 
 (def parsers
@@ -30,38 +33,44 @@
    :string #(list 'or % "")
    :boolean #(list 'contains? #{"true" "on"} %)})
 
-(defn sym->form [sym]
-  (when (symbol? sym)
+(defn sym->f [sym]
+  (or
     (some (fn [[k f]]
             (when (-> sym meta k)
-              (f sym)))
-          parsers)))
+              f))
+          parsers)
+    identity))
+
+(defn- make-f [args expanded]
+  (case (count args)
+    0 `(fn this# ([] ~@expanded) ([_#] (this#)))
+    1 `(fn ~args ~@expanded)
+    `(fn this#
+       (~(subvec args 0 1)
+         (this#
+           ~(args 0)
+           ~@(for [arg (rest args)]
+               ((sym->f arg) `(-> ~(args 0) :params ~(keyword arg))))))
+       (~args ~@expanded))))
+
 
 ;; args takes the form req followed by params
 (defmacro defcomponent [name args & body]
   (let [expanded (walk/postwalk expand-components body)
-        f (gensym)
-        req (first args)
-        bindings (subvec args 1)]
+        f (gensym)]
     `(def ~name
-       (let [~f (fn [~req]
-                  (let [{:keys ~bindings} (:params ~req)
-                        ~@(for [var bindings
-                                :let [form (sym->form var)]
-                                :when form
-                                x [var form]] x)]
-                    (render/snippet-response
-                      (do ~@expanded))))]
-         {:fn (fn ~args ~@expanded)
-          :endpoints ~(vec
-                        (conj
-                          (extract-endpoints body)
-                          [(str "/" name) f]))}))))
+       (let [~f ~(make-f args expanded)]
+         {:fn ~f
+          :endpoints ~(assoc (extract-endpoints body) (keyword name) f)}))))
+
+(defn extract-endpoints-all [f]
+  (for [[k f] (extract-endpoints f)]
+    [(str "/" (name k)) `(fn [x#] (-> x# ~f render/snippet-response))]))
 
 (defmacro make-routes [root f]
   `[~root
     [~(if (= "" root) "/" "") {:get ~(walk/postwalk expand-components f)}]
-    ~@(extract-endpoints f)])
+    ~@(extract-endpoints-all f)])
 
 (defmacro with-req [req & body]
   `(let [{:keys [~'request-method]} ~req

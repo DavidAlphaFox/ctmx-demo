@@ -1,6 +1,7 @@
 (ns htmx.render.period-selector
   (:require
     [clj-htmx.core :as htmx]
+    [htmx.render :as render]
     [htmx.util :as util]))
 
 (defn- select
@@ -15,13 +16,15 @@
      (for [option options]
        [:option {:value option} option])]]))
 
-(defn- input [title disabled?]
-  [:div.col
-   [:label title]
-   [:input.form-control
-    {:type "text"
-     :placeholder title
-     :disabled disabled?}]])
+(defn- input
+  ([title] (input title false))
+  ([title disabled?]
+   [:div.col
+    [:label title]
+    [:input.form-control
+     {:type "text"
+      :placeholder title
+      :disabled disabled?}]]))
 
 (def months '("January"
                "February"
@@ -37,17 +40,16 @@
                "December"))
 (def months-not-specified (conj months "Not Specified"))
 
-(htmx/defcomponent to-row [req ^:boolean present]
+(htmx/defendpoint to-row [req ^:boolean present]
   [:div#to-row.row {:style "margin-top: 15px"}
    [:div.col
     [:label "To Month"]
     [:input.form-check.form-check-inline.ml-2
-     {:type "checkbox"
-      :hx-patch "to-row"
-      :hx-target "#to-row"
-      :hx-swap "outerHTML"
-      :checked present
-      :name "present"}]
+     (render/other-target
+       "to-row"
+       :type "checkbox"
+       :checked present
+       :name "present")]
     "Present"
     [:select.custom-select
      {:disabled present}
@@ -64,3 +66,25 @@
     (select "From Month" months-not-specified)
     (input "From Year" false)]
    (to-row req false)])
+
+(htmx/defcomponent subrole-selector [req ^:number k details]
+  (let [details-label "Details.  Paragraphs separated with a blank line become bullet points."]
+    [:div
+     (when (> k 1)
+       [:button.btn.btn-primary.mb2
+        {:type "button"}
+        "Remove Subrole"])
+     [:div.row
+      (input "Subrole")]
+     (period-selector req)
+     [:div.row
+      (input "Location (optional)")]
+     [:div {:style "margin-top: 15px"}
+      [:label "Please provide details on this legal subrole and some brief examples of your past
+       transactions/deals, technical details, levels of responsibility and key customers (where
+       possible)."]
+      [:label "Paragraphs separated with a blank line become bullet points."]
+      [:textarea.form-control
+       {:placeholder details-label
+        :value details
+        :rows 6}]]]))

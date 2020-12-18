@@ -53,9 +53,15 @@
                ((sym->f arg) `(-> ~(args 0) :params ~(keyword arg))))))
        (~args ~@expanded))))
 
-
-;; args takes the form req followed by params
 (defmacro defcomponent [name args & body]
+  (let [expanded (walk/postwalk expand-components body)
+        f (gensym)]
+    `(def ~name
+       (let [~f ~(make-f args expanded)]
+         {:fn ~f
+          :endpoints ~(extract-endpoints body)}))))
+
+(defmacro defendpoint [name args & body]
   (let [expanded (walk/postwalk expand-components body)
         f (gensym)]
     `(def ~name

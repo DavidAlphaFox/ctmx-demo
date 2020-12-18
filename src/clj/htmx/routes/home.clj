@@ -5,13 +5,22 @@
     [htmx.render :as render]
     [htmx.render.period-selector :as period-selector]))
 
-(defn subroles []
-  [:div {:style "margin-top: 15px"}
-   [:label "Please provide details on this legal role and some brief examples of your past transactions/deals, technical details, levels of responsibility and key customers (where possible)."]
-   [:label "Paragraphs separated with a blank line become bullet points."]
-   [:textarea.form-control
-    {:placeholder "Acting as lead lawyer, project management of corporate transactions, customer relationship management and supervision of junior staff."
-     :rows "10"}]])
+(htmx/defendpoint subroles [req ^:boolean multiple-subroles subroles]
+  (if multiple-subroles
+    [:div#subroles
+     [:h4 "Subroles"]
+     [:p "Please provide at least two subroles."]
+     (map-indexed #(period-selector/subrole-selector req %1 %2) subroles)
+     [:br]
+     [:button.btn.btn-primary
+      {:button "button"}
+      "Add Subrole"]]
+    [:div#subroles {:style "margin-top: 15px"}
+     [:label "Please provide details on this legal role and some brief examples of your past transactions/deals, technical details, levels of responsibility and key customers (where possible)."]
+     [:label "Paragraphs separated with a blank line become bullet points."]
+     [:textarea.form-control
+      {:placeholder "Acting as lead lawyer, project management of corporate transactions, customer relationship management and supervision of junior staff."
+       :rows "10"}]]))
 
 (htmx/defcomponent legal-role-body [req]
   (let [title-tooltip "If you held multiple titles, please list the final / most senior position."
@@ -23,8 +32,12 @@
      (period-selector/period-selector req)
      (render/text "Location")
      [:div {:data-toggle "tooltip" :title subroles-tooltip}
-      (render/binary-radio "Did your work involve multiple subroles?")
-      (subroles)]]))
+      (render/binary-radio
+        "multiple-subroles"
+        "subroles"
+        "Did your work involve multiple subroles?"
+        false)
+      (subroles req false [])]]))
 
 (htmx/defcomponent legal-role-modal [req]
   (render/modal-large

@@ -15,7 +15,7 @@
     (-> body hiccup/html html-response)
     (no-content)))
 
-(defn html5-response [body]
+(defn html5-response [js body]
   (html-response
     (html5
       [:head
@@ -36,7 +36,8 @@
                  :integrity "sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
                  :crossorigin "anonymous"}]
        [:script {:src "https://unpkg.com/htmx.org@0.4.0"}]
-       [:script {:src "/js/helpers.js"}]])))
+       [:script {:src "/js/helpers.js"}]
+       [:script {:src (str "/js" js)}]])))
 
 (defn modal-large
   ([id title body] (modal-large id title body nil))

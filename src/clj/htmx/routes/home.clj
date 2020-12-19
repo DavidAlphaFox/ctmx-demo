@@ -10,7 +10,7 @@
     [:div#subroles
      [:h4 "Subroles"]
      [:p "Please provide at least two subroles."]
-     (map-indexed #(period-selector/subrole-selector req %1 %2) subroles)
+     (htmx/map-indexed-stack #(period-selector/subrole-selector req %1 %2) (or subroles ["" ""]))
      [:br]
      [:button.btn.btn-primary
       {:button "button"}
@@ -36,8 +36,8 @@
         "multiple-subroles"
         "subroles"
         "Did your work involve multiple subroles?"
-        false)
-      (subroles req false [])]]))
+        false)]
+     (subroles req false ["" ""])]))
 
 (htmx/defcomponent legal-role-modal [req]
   (render/modal-large
@@ -70,5 +70,6 @@
     ""
     (fn [req]
       (render/html5-response
+        "/home.js"
         [:div.container
          (form req)]))))

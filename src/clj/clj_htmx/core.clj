@@ -13,7 +13,7 @@
         (contains? evaluated :fn)
         (contains? evaluated :endpoints)))))
 
-(defn- expand-components [x]
+(defn expand-components [x]
   (if (component-macro? x)
     `(:fn ~x)
     x))
@@ -43,18 +43,27 @@
 
 (defn- make-f [args expanded]
   (case (count args)
-    0 `(fn this# ([] ~@expanded) ([_#] (this#)))
-    1 `(fn ~args ~@expanded)
+    0 `(fn this# ([] ~expanded) ([_#] (this#)))
+    1 `(fn ~args ~expanded)
     `(fn this#
        (~(subvec args 0 1)
          (this#
            ~(args 0)
            ~@(for [arg (rest args)]
                ((sym->f arg) `(-> ~(args 0) :params ~(keyword arg))))))
-       (~args ~@expanded))))
+       (~args ~expanded))))
+
+(def ^:dynamic *stack* [])
+(defmacro with-stack [n body]
+  `(binding [*stack* (conj *stack* ~(name n))]
+     ~@body))
+
+(defn map-indexed-stack [f s]
+  (doall
+    (map-indexed #(binding [*stack* (conj *stack* %1)] (f %1 %2)) s)))
 
 (defmacro defcomponent [name args & body]
-  (let [expanded (walk/postwalk expand-components body)
+  (let [expanded `(with-stack ~name ~(walk/postwalk expand-components body))
         f (gensym)]
     `(def ~name
        (let [~f ~(make-f args expanded)]
@@ -62,7 +71,7 @@
           :endpoints ~(extract-endpoints body)}))))
 
 (defmacro defendpoint [name args & body]
-  (let [expanded (walk/postwalk expand-components body)
+  (let [expanded `(with-stack ~name ~(walk/postwalk expand-components body))
         f (gensym)]
     `(def ~name
        (let [~f ~(make-f args expanded)]

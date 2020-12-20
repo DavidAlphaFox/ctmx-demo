@@ -4,27 +4,26 @@
     [htmx.render :as render]
     [htmx.util :as util]))
 
-(defn- select
-  ([label options] (select label options nil))
-  ([label options value]
-   [:div.col
-    [:label label]
-    [:select.form-control
-     (util/filter-vals
-       {:value value})
-     [:option "Please Select"]
-     (for [option options]
-       [:option {:value option} option])]]))
+(defn- select [label options]
+  [:div.col
+   [:label label]
+   [:select.form-control
+    {:required true}
+    [:option {:value ""} "Please Select"]
+    (for [option options]
+      [:option {:value option} option])]])
 
-(defn- input
-  ([title] (input title false))
+(defn- input [title m]
+  [:div.col
+   [:label title]
+   [:input.form-control m]])
+
+(defn text [title]
+  (input title {:type "text" :required true :placeholder title}))
+(defn number
+  ([title] (number title false))
   ([title disabled?]
-   [:div.col
-    [:label title]
-    [:input.form-control
-     {:type "text"
-      :placeholder title
-      :disabled disabled?}]]))
+   (input title {:type "number" :min 1900 :max 2100 :required true :placeholder title :disabled disabled?})))
 
 (def months '("January"
                "February"
@@ -53,19 +52,17 @@
        :name "present")]
     "Present"
     [:select.custom-select
-     {:disabled present}
-     [:option {:value "-2"} "Please Select"]
-     (map-indexed
-       (fn [i month]
-         [:option {:value (str (dec i))} month])
-       months-not-specified)]]
-   (input "To Year" present)])
+     {:disabled present :required true}
+     [:option {:value ""} "Please Select"]
+     (for [option months-not-specified]
+       [:option {:value option} option])]]
+   (number "To Year" present)])
 
 (htmx/defcomponent period-selector [req]
   [:div
    [:div.row {:style "margin-top: 15px"}
     (select "From Month" months-not-specified)
-    (input "From Year" false)]
+    (number "From Year")]
    (to-row req false)])
 
 (htmx/defcomponent subrole-selector [req ^:number k details]
@@ -76,10 +73,10 @@
         {:type "button"}
         "Remove Subrole"])
      [:div.row
-      (input "Subrole")]
+      (text "Subrole")]
      (period-selector req)
      [:div.row
-      (input "Location (optional)")]
+      (text "Location (optional)")]
      [:div {:style "margin-top: 15px"}
       [:label "Please provide details on this legal subrole and some brief examples of your past
        transactions/deals, technical details, levels of responsibility and key customers (where

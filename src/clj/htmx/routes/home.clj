@@ -25,7 +25,7 @@
 (htmx/defcomponent legal-role-body [req]
   (let [title-tooltip "If you held multiple titles, please list the final / most senior position."
         subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."]
-    [:div
+    [:form#new-legal-role
      [:div {:data-toggle "tooltip" :title title-tooltip}
       (render/text "Job Title")]
      (render/text "Company Name")
@@ -50,9 +50,10 @@
      [:button.btn.btn-primary
       {:type "button"}
       "Delete"]
-     [:button.btn.btn-primary.float-right
-      {:type "button"}
-      "Save"]]))
+     [:input.btn.btn-primary.float-right
+      {:type "submit"
+       :form "new-legal-role"
+       :value "Save"}]]))
 
 
 (htmx/defcomponent form [req]

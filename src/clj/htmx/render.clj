@@ -65,6 +65,7 @@
     [:input.form-control
      (util/filter-vals
        {:type type
+        :required true
         :placeholder placeholder
         :value value})]]))
 

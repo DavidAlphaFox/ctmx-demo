@@ -7,7 +7,7 @@
 
 (htmx/defendpoint subroles [req ^:boolean multiple-subroles subroles]
   (if multiple-subroles
-    [:div#subroles
+    [:div {:id id}
      [:h4 "Subroles"]
      [:p "Please provide at least two subroles."]
      (htmx/map-indexed-stack #(period-selector/subrole-selector req %1 %2) (or subroles ["" ""]))
@@ -15,7 +15,7 @@
      [:button.btn.btn-primary
       {:button "button"}
       "Add Subrole"]]
-    [:div#subroles {:style "margin-top: 15px"}
+    [:div {:id id :style "margin-top: 15px"}
      [:label "Please provide details on this legal role and some brief examples of your past transactions/deals, technical details, levels of responsibility and key customers (where possible)."]
      [:label "Paragraphs separated with a blank line become bullet points."]
      [:textarea.form-control
@@ -33,8 +33,9 @@
      (render/text "Location")
      [:div {:data-toggle "tooltip" :title subroles-tooltip}
       (render/binary-radio
-        "multiple-subroles"
         "subroles"
+        "multiple-subroles"
+        (str id "subroles")
         "Did your work involve multiple subroles?"
         false)]
      (subroles req false ["" ""])]))

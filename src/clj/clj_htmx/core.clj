@@ -1,6 +1,7 @@
 (ns clj-htmx.core
   (:require
     [clj-htmx.render :as render]
+    [clojure.string :as string]
     [clojure.walk :as walk]))
 
 (defn- component-macro? [x]
@@ -43,7 +44,7 @@
 
 (defn- make-f [args expanded]
   (case (count args)
-    0 `(fn this# ([] ~expanded) ([_#] (this#)))
+    0 (throw (Exception. "zero args not supported"))
     1 `(fn ~args ~expanded)
     `(fn this#
        (~(subvec args 0 1)
@@ -54,16 +55,23 @@
        (~args ~expanded))))
 
 (def ^:dynamic *stack* [])
-(defmacro with-stack [n body]
+
+(defn set-id [req]
+  (if-let [target (get-in req [:headers "hx-target"])]
+    (str target (string/join (rest *stack*)))
+    (string/join *stack*)))
+
+(defn with-stack [n [req] body]
   `(binding [*stack* (conj *stack* ~(name n))]
-     ~@body))
+     (let [~'id (set-id ~req)]
+       ~@body)))
 
 (defn map-indexed-stack [f s]
   (doall
     (map-indexed #(binding [*stack* (conj *stack* %1)] (f %1 %2)) s)))
 
 (defmacro defcomponent [name args & body]
-  (let [expanded `(with-stack ~name ~(walk/postwalk expand-components body))
+  (let [expanded (with-stack name args (walk/postwalk expand-components body))
         f (gensym)]
     `(def ~name
        (let [~f ~(make-f args expanded)]
@@ -71,7 +79,7 @@
           :endpoints ~(extract-endpoints body)}))))
 
 (defmacro defendpoint [name args & body]
-  (let [expanded `(with-stack ~name ~(walk/postwalk expand-components body))
+  (let [expanded (with-stack name args (walk/postwalk expand-components body))
         f (gensym)]
     `(def ~name
        (let [~f ~(make-f args expanded)]

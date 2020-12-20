@@ -73,18 +73,19 @@
 (def number (partial input "number"))
 (def password (partial input "password"))
 
-(defn other-target [id & args]
+(defn other-target [endpoint id & args]
   (apply array-map
-         :hx-patch id
+         :hx-patch endpoint
          :hx-target (str "#" id)
          :hx-swap "outerHTML"
          args))
 
-(defn binary-radio [name target label value]
+(defn binary-radio [endpoint name target label value]
   [:div {:style "margin-top: 15px"}
    [:label label]
    [:div.m-2
     [:input (other-target
+              endpoint
               target
               :type "radio"
               :name name
@@ -92,6 +93,7 @@
               :value "true") "Yes"]]
    [:div.m-2
     [:input (other-target
+              endpoint
               target
               :type "radio"
               :name name

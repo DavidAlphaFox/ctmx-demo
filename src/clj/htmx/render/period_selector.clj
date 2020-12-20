@@ -41,12 +41,13 @@
 (def months-not-specified (conj months "Not Specified"))
 
 (htmx/defendpoint to-row [req ^:boolean present]
-  [:div#to-row.row {:style "margin-top: 15px"}
+  [:div.row {:style "margin-top: 15px" :id id}
    [:div.col
     [:label "To Month"]
     [:input.form-check.form-check-inline.ml-2
      (render/other-target
        "to-row"
+       id
        :type "checkbox"
        :checked present
        :name "present")]

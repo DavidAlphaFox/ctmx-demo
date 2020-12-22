@@ -25,17 +25,18 @@
 (htmx/defcomponent legal-role-body [req]
   (let [title-tooltip "If you held multiple titles, please list the final / most senior position."
         subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."]
+    (prn 'params-json params-json)
     [:form#new-legal-role
      [:div {:data-toggle "tooltip" :title title-tooltip}
-      (render/text "Job Title")]
+      (render/text "Job Title" (str id "_title"))]
      (render/text "Company Name")
      (period-selector/period-selector req)
      (render/text "Location")
      [:div {:data-toggle "tooltip" :title subroles-tooltip}
       (render/binary-radio
         "subroles"
-        "multiple-subroles"
-        (str id "subroles")
+        (str id "_multiple-subroles")
+        (str id "_subroles")
         "Did your work involve multiple subroles?"
         false)]
      (subroles req false ["" ""])]))
@@ -69,7 +70,7 @@
 
 (defn home-routes []
   (htmx/make-routes
-    ""
+    "/"
     (fn [req]
       (render/html5-response
         "/home.js"

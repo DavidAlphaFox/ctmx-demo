@@ -1,6 +1,5 @@
 $(function () {
   $('[data-toggle="tooltip"]').tooltip();
-  htmx.config.defaultSettleDelay = 0;
 })
 
 document.body.addEventListener('htmx:beforeRequest', () => {

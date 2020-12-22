@@ -22,24 +22,29 @@
       {:placeholder "Acting as lead lawyer, project management of corporate transactions, customer relationship management and supervision of junior staff."
        :rows "10"}]]))
 
-(htmx/defcomponent legal-role-body [req]
+(htmx/defendpoint legal-role-body [req]
   (let [title-tooltip "If you held multiple titles, please list the final / most senior position."
-        subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."]
-    (prn 'params-json params-json)
-    [:form#new-legal-role
+        subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."
+        default-subroles? true]
+    (prn 'params params)
+    [:form
+     {:id id
+      :hx-post "legal-role-body"
+      :hx-swap "outerHTML"}
      [:div {:data-toggle "tooltip" :title title-tooltip}
-      (render/text "Job Title" (str id "_title"))]
-     (render/text "Company Name")
+      (render/text "Job Title" (path "title") (value "title"))]
+     (render/text "Company Name" (path "company") (value "company"))
      (period-selector/period-selector req)
-     (render/text "Location")
+     (render/text "Location" (path "location") (value "location"))
      [:div {:data-toggle "tooltip" :title subroles-tooltip}
       (render/binary-radio
         "subroles"
-        (str id "_multiple-subroles")
-        (str id "_subroles")
+        (path "multiple-subroles")
+        (path "subroles")
         "Did your work involve multiple subroles?"
-        false)]
-     (subroles req false ["" ""])]))
+        default-subroles?)]
+     (subroles req default-subroles? nil)
+     (render/submit-hidden "new-legal-role-submit")]))
 
 (htmx/defcomponent legal-role-modal [req]
   (render/modal-large
@@ -51,10 +56,11 @@
      [:button.btn.btn-primary
       {:type "button"}
       "Delete"]
-     [:input.btn.btn-primary.float-right
-      {:type "submit"
+     [:button.btn.btn-primary.float-right
+      {:type "button"
        :form "new-legal-role"
-       :value "Save"}]]))
+       :onclick "$('#new-legal-role-submit').click()"}
+      "Save"]]))
 
 
 (htmx/defcomponent form [req]

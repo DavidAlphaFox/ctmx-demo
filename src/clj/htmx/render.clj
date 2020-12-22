@@ -77,6 +77,9 @@
 (def number (partial input "number"))
 (def password (partial input "password"))
 
+(defn submit-hidden [id]
+  [:input {:type "submit" :style "display: none" :id id}])
+
 (defn other-target [endpoint id & args]
   (apply array-map
          :hx-get endpoint

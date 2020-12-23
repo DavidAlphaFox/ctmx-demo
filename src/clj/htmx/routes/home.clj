@@ -20,13 +20,15 @@
      [:label "Paragraphs separated with a blank line become bullet points."]
      [:textarea.form-control
       {:placeholder "Acting as lead lawyer, project management of corporate transactions, customer relationship management and supervision of junior staff."
-       :rows "10"}]]))
+       :rows "10"
+       :name (path "details")}
+      (value "details")]]))
 
 (htmx/defendpoint legal-role-body [req]
   (let [title-tooltip "If you held multiple titles, please list the final / most senior position."
         subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."
-        default-subroles? true]
-    (prn 'params params)
+        multiple-subroles? (-> "multiple-subroles" value htmx/parse-boolean)]
+    (prn 'params-json params-json)
     [:form
      {:id id
       :hx-post "legal-role-body"
@@ -42,8 +44,8 @@
         (path "multiple-subroles")
         (path "subroles")
         "Did your work involve multiple subroles?"
-        default-subroles?)]
-     (subroles req default-subroles? nil)
+        multiple-subroles?)]
+     (subroles req multiple-subroles? nil)
      (render/submit-hidden "new-legal-role-submit")]))
 
 (htmx/defcomponent legal-role-modal [req]

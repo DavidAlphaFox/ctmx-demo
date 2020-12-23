@@ -18,16 +18,23 @@
    [:label title]
    [:input.form-control m]])
 
-(defn text [title name value]
+(defn text [title name value required?]
   (input title {:type "text"
                 :name name
                 :value value
-                :required true
+                :required required?
                 :placeholder title}))
 (defn number
-  ([title] (number title false))
-  ([title disabled?]
-   (input title {:type "number" :min 1900 :max 2100 :value 1960 :required true :placeholder title :disabled disabled?})))
+  ([title] (number title nil false))
+  ([title name value disabled?]
+   (input title {:type "number"
+                 :min 1900
+                 :max 2100
+                 :name name
+                 :value value
+                 :required true
+                 :placeholder title
+                 :disabled disabled?})))
 
 (def months '("January"
                "February"
@@ -53,23 +60,23 @@
        id
        :type "checkbox"
        :checked present
-       :name (str id "_present"))]
+       :name (path "present"))]
     "Present"
     [:select.custom-select
-     {:disabled present :required true}
+     {:disabled present :required true :name (path "to-month")}
      [:option {:value ""} "Please Select"]
      (for [option months-not-specified]
-       [:option {:value option} option])]]
-   (number "To Year" present)])
+       [:option {:value option :selected (= option (value "to-month"))} option])]]
+   (number "To Year" (path "to-year") (value "to-year") present)])
 
 (htmx/defcomponent period-selector [req]
   [:div
    [:div.row {:style "margin-top: 15px"}
     (select "From Month" (path "from-month") months-not-specified (value "from-month"))
-    (number "From Year")]
-   (to-row req false)])
+    (number "From Year" (path "from-year") (value "from-year") false)]
+   (to-row req (value "to-row_present"))])
 
-(htmx/defendpoint subrole-selector [req ^:number k details]
+(htmx/defcomponent subrole-selector [req ^:number k details]
   (let [details-label "Details.  Paragraphs separated with a blank line become bullet points."]
     [:div
      (when (> k 1)
@@ -77,10 +84,10 @@
         {:type "button"}
         "Remove Subrole"])
      [:div.row
-      (text "Subrole" (path "title") "hi")]
+      (text "Subrole" (path "title") (value "title") true)]
      (period-selector req)
      [:div.row.mt-2
-      (text "Location (optional)" (path "location") "hi")]
+      (text "Location (optional)" (path "location") (value "location") false)]
      [:div {:style "margin-top: 15px"}
       [:label "Please provide details on this legal subrole and some brief examples of your past
        transactions/deals, technical details, levels of responsibility and key customers (where
@@ -90,4 +97,4 @@
        {:placeholder details-label
         :name (path "details")
         :rows 6}
-       "ok"]]]))
+       (value "details")]]]))

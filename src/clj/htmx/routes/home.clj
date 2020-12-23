@@ -5,12 +5,12 @@
     [htmx.render :as render]
     [htmx.render.period-selector :as period-selector]))
 
-(htmx/defendpoint subroles [req ^:boolean multiple-subroles subroles]
+(htmx/defcomponent ^:endpoint subroles [req ^:boolean multiple-subroles subroles]
   (if multiple-subroles
     [:div {:id id}
      [:h4 "Subroles"]
      [:p "Please provide at least two subroles."]
-     (htmx/map-indexed-stack #(period-selector/subrole-selector req %1 %2) (or subroles ["" ""]))
+     (htmx/map-indexed #(period-selector/subrole-selector req %1 %2) (or subroles ["" ""]))
      [:br]
      [:button.btn.btn-primary
       {:button "button"}
@@ -24,11 +24,10 @@
        :name (path "details")}
       (value "details")]]))
 
-(htmx/defendpoint legal-role-body [req]
+(htmx/defcomponent ^:endpoint legal-role-body [req]
   (let [title-tooltip "If you held multiple titles, please list the final / most senior position."
         subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."
         multiple-subroles? (-> "multiple-subroles" value htmx/parse-boolean)]
-    (prn 'params-json params-json)
     [:form
      {:id id
       :hx-post "legal-role-body"

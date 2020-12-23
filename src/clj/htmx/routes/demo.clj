@@ -3,7 +3,7 @@
     [clj-htmx.core :as htmx]
     [htmx.render :as render]))
 
-(htmx/defendpoint hello [req my-name]
+(htmx/defcomponent ^:endpoint hello [req my-name]
   [:div#hello "Hello " my-name])
 
 (defn demo-routes []

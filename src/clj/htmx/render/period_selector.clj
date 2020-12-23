@@ -50,7 +50,7 @@
                "December"))
 (def months-not-specified (conj months "Not Specified"))
 
-(htmx/defendpoint to-row [req ^:boolean present]
+(htmx/defcomponent ^:endpoint to-row [req ^:boolean present]
   [:div.row {:style "margin-top: 15px" :id id}
    [:div.col
     [:label "To Month"]
@@ -76,7 +76,7 @@
     (number "From Year" (path "from-year") (value "from-year") false)]
    (to-row req (value "to-row_present"))])
 
-(htmx/defcomponent subrole-selector [req ^:number k details]
+(htmx/defcomponent subrole-selector [req k details]
   (let [details-label "Details.  Paragraphs separated with a blank line become bullet points."]
     [:div
      (when (> k 1)

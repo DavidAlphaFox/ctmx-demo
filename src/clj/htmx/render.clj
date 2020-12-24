@@ -77,22 +77,9 @@
 (def password (partial input "password"))
 
 (def submit-hidden
-  (list
-    [:input {:type "hidden" :name "submit-type"}]
-    [:input {:type "submit" :style "display: none"}]))
-
-(defn- set-validate [id validate?]
-  (format "document.getElementById('%s').noValidate = %s;" id (not validate?)))
-(defn- set-submit-type [id type]
-  (format "$('#%s input[name=\"submit-type\"]').val('%s');" id type))
-(defn- submit-form [id]
+  [:input {:type "submit" :style "display: none"}])
+(defn submit [id]
   (format "$('#%s input[type=\"submit\"]').click();" id))
-
-(defn submit
-  ([id]
-   (str (set-validate id true) (set-submit-type id "submit") (submit-form id)))
-  ([id type]
-   (str (set-validate id false) (set-submit-type id type) (submit-form id))))
 
 
 (defn other-target [endpoint id & args]

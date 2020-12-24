@@ -64,11 +64,15 @@
     [:div {:style "width: 100%"}
      ;; todo when editing only
      [:button.btn.btn-primary
-      {:type "button"}
+      {:type "button"
+       :hx-delete "legal-role-body"
+       :hx-swap "outerHTML"
+       :hx-target (str "#" (path "legal-role-body"))
+       :hx-include (format "#%s *" (path "legal-role-body"))}
       "Delete"]
      [:button.btn.btn-primary.float-right
       {:type "button"
-       :onclick (render/submit (path "legal-role-body") "fuck")}
+       :onclick (render/submit (path "legal-role-body"))}
       "Save"]]))
 
 

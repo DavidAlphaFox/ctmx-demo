@@ -51,16 +51,18 @@
 (def months-not-specified (conj months "Not Specified"))
 
 (htmx/defcomponent ^:endpoint to-row [req ^:boolean present]
+  (prn 'to-row params)
   [:div.row {:style "margin-top: 15px" :id id}
    [:div.col
     [:label "To Month"]
     [:input.form-check.form-check-inline.ml-2
-     (render/other-target
-       "to-row"
-       id
-       :type "checkbox"
-       :checked present
-       :name (path "present"))]
+     {:hx-get "to-row"
+      :hx-target (str "#" id)
+      :hx-swap "outerHTML"
+      :hx-include (format "#%s *" id)
+      :type "checkbox"
+      :checked present
+      :name (path "present")}]
     "Present"
     [:select.custom-select
      {:disabled present :required true :name (path "to-month")}

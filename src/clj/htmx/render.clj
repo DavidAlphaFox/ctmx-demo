@@ -36,7 +36,7 @@
        [:script {:src "https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
                  :integrity "sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
                  :crossorigin "anonymous"}]
-       [:script {:src "https://unpkg.com/htmx.org@0.4.0"}]
+       [:script {:src "/js/htmx.min.js"}]
        [:script {:src "/js/helpers.js"}]
        (when js [:script {:src (str "/js" js)}])))))
 
@@ -76,8 +76,24 @@
 (def number (partial input "number"))
 (def password (partial input "password"))
 
-(defn submit-hidden [id]
-  [:input {:type "submit" :style "display: none" :id id}])
+(def submit-hidden
+  (list
+    [:input {:type "hidden" :name "submit-type"}]
+    [:input {:type "submit" :style "display: none"}]))
+
+(defn- set-validate [id validate?]
+  (format "document.getElementById('%s').noValidate = %s;" id (not validate?)))
+(defn- set-submit-type [id type]
+  (format "$('#%s input[name=\"submit-type\"]').val('%s');" id type))
+(defn- submit-form [id]
+  (format "$('#%s input[type=\"submit\"]').click();" id))
+
+(defn submit
+  ([id]
+   (str (set-validate id true) (set-submit-type id "submit") (submit-form id)))
+  ([id type]
+   (str (set-validate id false) (set-submit-type id type) (submit-form id))))
+
 
 (defn other-target [endpoint id & args]
   (apply array-map

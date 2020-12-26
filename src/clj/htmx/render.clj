@@ -110,3 +110,17 @@
               :value "false") "No"]]])
 
 (def include-all #(format "#%s *" %))
+
+(defn wrap-button [b m & body]
+  (let [{:keys [name]} m
+        id (gensym)]
+    (list
+      [:input {:type "hidden"
+               :name name
+               :value "false"
+               :id id}]
+      [b
+       (-> m
+           (dissoc :name)
+           (assoc :onclick (format "$('#%s').val('true')" id)))
+       body])))

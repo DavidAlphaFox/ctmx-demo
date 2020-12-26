@@ -108,3 +108,5 @@
               :name name
               :checked (not value)
               :value "false") "No"]]])
+
+(def include-all #(format "#%s *" %))

@@ -19,8 +19,12 @@
        [:input {:type "hidden" :name "num-subroles" :value num-subroles}]
        (htmx/map-range period-selector/subrole-selector req num-subroles)
        [:br]
-       [:button.btn.btn-primary
-        {:button "button"}
+       [:input.btn.btn-primary
+        {:type "button"
+         :hx-patch "legal-role-body"
+         :hx-swap "outerHTML"
+         :hx-target (hash "..")
+         :hx-include (render/include-all (path "legal-role-body"))}
         "Add Subrole"]]
       [:div {:id id :style "margin-top: 15px"}
        [:label "Please provide details on this legal role and some brief examples of your past transactions/deals, technical details, levels of responsibility and key customers (where possible)."]
@@ -67,8 +71,8 @@
       {:type "button"
        :hx-delete "legal-role-body"
        :hx-swap "outerHTML"
-       :hx-target (str "#" (path "legal-role-body"))
-       :hx-include (format "#%s *" (path "legal-role-body"))}
+       :hx-target (hash "legal-role-body")
+       :hx-include (render/include-all (path "legal-role-body"))}
       "Delete"]
      [:button.btn.btn-primary.float-right
       {:type "button"

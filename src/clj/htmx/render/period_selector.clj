@@ -51,7 +51,6 @@
 (def months-not-specified (conj months "Not Specified"))
 
 (htmx/defcomponent ^:endpoint to-row [req ^:boolean present]
-  (prn 'to-row params)
   [:div.row {:style "margin-top: 15px" :id id}
    [:div.col
     [:label "To Month"]
@@ -59,7 +58,7 @@
      {:hx-get "to-row"
       :hx-target (str "#" id)
       :hx-swap "outerHTML"
-      :hx-include (format "#%s *" id)
+      :hx-include (render/include-all id)
       :type "checkbox"
       :checked present
       :name (path "present")}]
@@ -67,7 +66,7 @@
     [:select.custom-select
      {:disabled present :required true :name (path "to-month")}
      [:option {:value ""} "Please Select"]
-     (for [option months-not-specified]
+     (htmx/forall [option months-not-specified]
        [:option {:value option :selected (= option (value "to-month"))} option])]]
    (number "To Year" (path "to-year") (value "to-year") present)])
 
@@ -78,7 +77,7 @@
     (number "From Year" (path "from-year") (value "from-year") false)]
    (to-row req (value "to-row_present"))])
 
-(htmx/defcomponent subrole-selector [req k details]
+(htmx/defcomponent subrole-selector [req k]
   (let [details-label "Details.  Paragraphs separated with a blank line become bullet points."]
     [:div
      (when (> k 1)

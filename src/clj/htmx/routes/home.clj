@@ -6,8 +6,9 @@
     [htmx.render.period-selector :as period-selector]
     [htmx.util :as util]))
 
-(htmx/defcomponent ^:endpoint subroles [req ^:boolean-true multiple-subroles]
-  (let [{:keys [num-subroles submit-type]} params
+(htmx/defcomponent ^:endpoint subroles [req]
+  (let [multiple-subroles ^:boolean-true (value ".." "multiple-subroles")
+        {:keys [num-subroles submit-type]} params
         num-subroles (util/$-> num-subroles
                                htmx/parse-int
                                (or $ 2)
@@ -22,9 +23,9 @@
        (render/wrap-button
          :button.btn.btn-primary
          {:type "button"
-          :hx-patch "legal-role-body"
+          :hx-patch "subroles"
           :hx-swap "outerHTML"
-          :hx-target (hash "..")
+          :hx-target (hash)
           :hx-include (render/include-all (path "legal-role-body"))
           :name "add-subrole"}
          "Add Subrole")]
@@ -38,10 +39,9 @@
          :name (path "details")}
         (value "details")]])))
 
-(htmx/defcomponent ^:endpoint legal-role-body [req]
+(htmx/defcomponent ^:endpoint legal-role-body [req ^:boolean-true multiple-subroles]
   (let [title-tooltip "If you held multiple titles, please list the final / most senior position."
-        subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."
-        multiple-subroles? (-> "multiple-subroles" value htmx/parse-boolean-true)]
+        subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."]
     (prn 'params params)
     [:form
      {:id id
@@ -58,8 +58,8 @@
         (path "multiple-subroles")
         (path "subroles")
         "Did your work involve multiple subroles?"
-        multiple-subroles?)]
-     (subroles req multiple-subroles?)
+        multiple-subroles)]
+     (subroles req)
      render/submit-hidden]))
 
 (htmx/defcomponent legal-role-modal [req]

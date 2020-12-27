@@ -112,11 +112,10 @@
 (def include-all #(format "#%s *" %))
 
 (defn wrap-button [b m & body]
-  (let [{:keys [name]} m
-        id (gensym)]
+  (let [id (gensym)]
     (list
       [:input {:type "hidden"
-               :name name
+               :name (:name m)
                :value "false"
                :id id}]
       [b

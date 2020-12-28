@@ -57,7 +57,6 @@
     [:input.form-check.form-check-inline.ml-2
      {:hx-get "to-row"
       :hx-target (str "#" id)
-      :hx-swap "outerHTML"
       :hx-include (render/include-all id)
       :type "checkbox"
       :checked present
@@ -84,7 +83,6 @@
        [:button.btn.btn-primary.my-2
         {:type "button"
          :hx-patch "subroles"
-         :hx-swap "outerHTML"
          :hx-target (hash "../..")
          :hx-vals (util/write-str {:remove-subrole k})}
         "Remove Subrole"])

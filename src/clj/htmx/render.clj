@@ -81,33 +81,23 @@
 (defn submit [id]
   (format "$('#%s input[type=\"submit\"]').click();" id))
 
-
-(defn other-target [endpoint id & args]
-  (apply array-map
-         :hx-get endpoint
-         :hx-target (str "#" id)
-         :hx-swap "outerHTML"
-         args))
-
 (defn binary-radio [endpoint name target label value]
   [:div {:style "margin-top: 15px"}
    [:label label]
    [:div.m-2
-    [:input (other-target
-              endpoint
-              target
-              :type "radio"
-              :name name
-              :checked value
-              :value "true") "Yes"]]
+    [:input {:endpoint endpoint
+             :target (str "#" target)
+             :type "radio"
+             :name name
+             :checked value
+             :value "true"} "Yes"]]
    [:div.m-2
-    [:input (other-target
-              endpoint
-              target
-              :type "radio"
-              :name name
-              :checked (not value)
-              :value "false") "No"]]])
+    [:input {:endpoint endpoint
+             :target (str "#" target)
+             :type "radio"
+             :name name
+             :checked (not value)
+             :value "false"} "No"]]])
 
 (def include-all #(format "#%s *" %))
 

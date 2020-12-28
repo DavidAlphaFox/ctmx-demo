@@ -67,7 +67,7 @@
      {:disabled present :required true :name (path "to-month")}
      [:option {:value ""} "Please Select"]
      (htmx/forall [option months-not-specified]
-       [:option {:value option :selected (= option (value "to-month"))} option])]]
+                  [:option {:value option :selected (= option (value "to-month"))} option])]]
    (number "To Year" (path "to-year") (value "to-year") present)])
 
 (htmx/defcomponent period-selector [req]
@@ -81,15 +81,13 @@
   (let [details-label "Details.  Paragraphs separated with a blank line become bullet points."]
     [:div
      (when (> k 1)
-       (render/wrap-button
-         :button.btn.btn-primary.my-2
-         {:type "button"
-          :hx-patch "subroles"
-          :hx-swap "outerHTML"
-          :hx-target (hash "../..")
-          :name "remove-subrole"
-          :value k}
-         "Remove Subrole"))
+       [:button.btn.btn-primary.my-2
+        {:type "button"
+         :hx-patch "subroles"
+         :hx-swap "outerHTML"
+         :hx-target (hash "../..")
+         :hx-vals (util/write-str {:remove-subrole k})}
+        "Remove Subrole"])
      [:div.row
       (text "Subrole" (path "title") (value "title") true)]
      (period-selector req)

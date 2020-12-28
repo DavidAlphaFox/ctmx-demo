@@ -1,4 +1,6 @@
-(ns htmx.util)
+(ns htmx.util
+  (:require
+    [clojure.data.json :as json]))
 
 (defn filter-vals
   ([m]
@@ -11,3 +13,5 @@
              (if (symbol? item)
                `(~item ~'$)
                item))))
+
+(def write-str json/write-str)

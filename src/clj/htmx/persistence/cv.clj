@@ -100,10 +100,22 @@
      :industryTop3 [],
      :areasOfWorkFuture [],
      :industryFuture [],
-     :previousLegalRoles [],
+     :previousLegalRoles
+     [{:title "a",
+       :company "b",
+       :period-selector
+       {:from-month "Not Specified",
+        :from-year "1960",
+        :to-row {:present "on"}},
+        :location "a",
+        :multiple-subroles "false",
+       :subroles {:details "b"}}],
      :previousRoles [],
      :admissions [],
      :qualifications [],
      :languages [],
      :interests ""}))
+
+(defn add-legal-role [role]
+  (swap! cv update :previousLegalRoles conj role))
 

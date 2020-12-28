@@ -1,48 +1,65 @@
 (ns htmx.routes.home
   (:require
     [clj-htmx.core :as htmx]
+    [clj-htmx.form :as form]
     [htmx.persistence.cv :as persistence.cv]
     [htmx.render :as render]
     [htmx.render.period-selector :as period-selector]
     [htmx.util :as util]))
 
+(defn dissoc-i [v i]
+  (->> (assoc v i nil)
+       (filter identity)
+       vec))
+
+(defn remove-subrole [params to-remove]
+  (-> params
+      (update-in [:form :legal-role-modal :legal-role-body :subroles] dissoc-i to-remove)
+      (update :num-subroles #(-> % Integer/parseInt dec))))
+
+(defn remove-subrole-params [params]
+  (if-let [to-remove (->> params
+                          :remove-subrole
+                          htmx/read-strings
+                          (some identity))]
+    (form/apply-params params remove-subrole to-remove)
+    params))
+
 (htmx/defcomponent ^:endpoint subroles [req]
-  (let [multiple-subroles ^:boolean-true (value ".." "multiple-subroles")
-        {:keys [num-subroles submit-type]} params
-        num-subroles (util/$-> num-subroles
-                               htmx/parse-int
-                               (or $ 2)
-                               (if (= "inc-subroles" submit-type) (inc $) $))]
-    (if multiple-subroles
-      [:div {:id id}
-       [:h4 "Subroles"]
-       [:p "Please provide at least two subroles."]
-       [:input {:type "hidden" :name "num-subroles" :value num-subroles}]
-       (htmx/map-range period-selector/subrole-selector req num-subroles)
-       [:br]
-       (render/wrap-button
-         :button.btn.btn-primary
-         {:type "button"
-          :hx-patch "subroles"
-          :hx-swap "outerHTML"
-          :hx-target (hash)
-          :hx-include (render/include-all (path "legal-role-body"))
-          :name "add-subrole"}
-         "Add Subrole")]
-      [:div {:id id :style "margin-top: 15px"}
-       [:label "Please provide details on this legal role and some brief examples of your past transactions/deals, technical details, levels of responsibility and key customers (where possible)."]
-       [:label "Paragraphs separated with a blank line become bullet points."]
-       [:textarea.form-control
-        {:placeholder "Acting as lead lawyer, project management of corporate transactions, customer relationship management and supervision of junior staff."
-         :rows "10"
-         :required true
-         :name (path "details")}
-        (value "details")]])))
+  (htmx/update-params
+    remove-subrole-params
+    (let [multiple-subroles ^:boolean-true (value "../multiple-subroles")
+          num-subroles (or ^:int (value "/num-subroles") 2)
+          add-subrole ^:boolean (value "/add-subrole")
+          num-subroles (if add-subrole (inc num-subroles) num-subroles)]
+      (if multiple-subroles
+        [:div {:id id}
+         [:h4 "Subroles"]
+         [:p "Please provide at least two subroles."]
+         [:input {:type "hidden" :name "num-subroles" :value num-subroles}]
+         (htmx/map-range period-selector/subrole-selector req num-subroles)
+         [:br]
+         (render/wrap-button
+           :button.btn.btn-primary
+           {:type "button"
+            :hx-patch "subroles"
+            :hx-swap "outerHTML"
+            :hx-target (hash ".")
+            :name "add-subrole"}
+           "Add Subrole")]
+        [:div {:id id :style "margin-top: 15px"}
+         [:label "Please provide details on this legal role and some brief examples of your past transactions/deals, technical details, levels of responsibility and key customers (where possible)."]
+         [:label "Paragraphs separated with a blank line become bullet points."]
+         [:textarea.form-control
+          {:placeholder "Acting as lead lawyer, project management of corporate transactions, customer relationship management and supervision of junior staff."
+           :rows "10"
+           :required true
+           :name (path "details")}
+          (value "details")]]))))
 
 (htmx/defcomponent ^:endpoint legal-role-body [req ^:boolean-true multiple-subroles]
   (let [title-tooltip "If you held multiple titles, please list the final / most senior position."
         subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."]
-    (prn 'params params)
     [:form
      {:id id
       :hx-post "legal-role-body"

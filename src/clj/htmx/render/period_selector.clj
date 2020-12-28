@@ -81,9 +81,15 @@
   (let [details-label "Details.  Paragraphs separated with a blank line become bullet points."]
     [:div
      (when (> k 1)
-       [:button.btn.btn-primary.mb-2
-        {:type "button"}
-        "Remove Subrole"])
+       (render/wrap-button
+         :button.btn.btn-primary.my-2
+         {:type "button"
+          :hx-patch "subroles"
+          :hx-swap "outerHTML"
+          :hx-target (hash "../..")
+          :name "remove-subrole"
+          :value k}
+         "Remove Subrole"))
      [:div.row
       (text "Subrole" (path "title") (value "title") true)]
      (period-selector req)

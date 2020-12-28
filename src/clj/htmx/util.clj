@@ -15,3 +15,8 @@
                item))))
 
 (def write-str json/write-str)
+
+(defn dissoc-i [v i]
+  (->> (assoc v i nil)
+       (filter identity)
+       vec))

@@ -9,14 +9,9 @@
     [htmx.service.cv :as cv]
     [htmx.util :as util]))
 
-(defn dissoc-i [v i]
-  (->> (assoc v i nil)
-       (filter identity)
-       vec))
-
 (defn remove-subrole [params to-remove]
   (-> params
-      (update-in [:cv :legal-role-modal :legal-role-body :subroles] dissoc-i to-remove)
+      (update-in [:cv :legal-role-modal :legal-role-body :subroles] util/dissoc-i to-remove)
       (update :num-subroles #(-> % Integer/parseInt dec))))
 
 (defn remove-subrole-params [params]
@@ -70,40 +65,61 @@
 (htmx/defcomponent ^:endpoint legal-role-body [req ^:boolean multiple-subroles ^:int index]
   (htmx/update-params
     #(insert-cv-params index req %)
-    (htmx/with-req req
-      (if post?
-        (let [json-params (form/json-params-pruned htmx/*params*)]
-          (-> json-params
-              (dissoc :index)
-              cv/add-legal-role)
-          response/hx-refresh)
-        (let [title-tooltip "If you held multiple titles, please list the final / most senior position."
-              subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."]
-          (list
-            (when hx-request?
-              [:button.btn.btn-primary.float-right
-               {:id (path "../save-button")
+    (case (:request-method req)
+      :post
+      (let [role (-> htmx/*params*
+                     form/json-params-pruned
+                     (dissoc :index))]
+        (if index
+          (cv/insert-legal-role index role)
+          (cv/add-legal-role role))
+        response/hx-refresh)
+      :delete
+      (do
+        (cv/remove-legal-role index)
+        response/hx-refresh)
+      (let [title-tooltip "If you held multiple titles, please list the final / most senior position."
+            subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."]
+        (list
+          (when hx-request?
+            [:button.btn.btn-primary.float-right
+             {:id (path "../save-button")
+              :type "button"
+              :onclick (render/submit (path "."))
+              :hx-swap-oob "true"}
+             (if index "Update" "Save")])
+          (when hx-request?
+            (if index
+              [:button.btn.btn-primary
+               {:id (path "../delete")
                 :type "button"
-                :onclick (render/submit (path "legal-role-body"))
+                :hx-delete "legal-role-body"
+                :hx-target (hash ".")
+                :hx-vals (util/write-str {(path "index") index})
+                :hx-confirm "Delete?"
                 :hx-swap-oob "true"}
-               (if index "Update" "Save")])
-            [:form {:id id
-                    :hx-post "legal-role-body"}
-             [:input {:id (path "index") :type "hidden" :value index}]
-             [:div {:data-toggle "tooltip" :title title-tooltip}
-              (render/text "Job Title" (path "title") (value "title"))]
-             (render/text "Company Name" (path "company") (value "company"))
-             (period-selector/period-selector req)
-             (render/text "Location" (path "location") (value "location"))
-             [:div {:data-toggle "tooltip" :title subroles-tooltip}
-              (render/binary-radio
-                "subroles"
-                (path "multiple-subroles")
-                (path "subroles")
-                "Did your work involve multiple subroles?"
-                multiple-subroles)]
-             (subroles req)
-             render/submit-hidden]))))))
+               "Delete"]
+              [:div
+               {:id (path "../delete")
+                :style "display: none"
+                :hx-swap-oob "true"}]))
+          [:form {:id id
+                  :hx-post "legal-role-body"}
+           [:input {:name (path "index") :type "hidden" :value index}]
+           [:div {:data-toggle "tooltip" :title title-tooltip}
+            (render/text "Job Title" (path "title") (value "title"))]
+           (render/text "Company Name" (path "company") (value "company"))
+           (period-selector/period-selector req)
+           (render/text "Location" (path "location") (value "location"))
+           [:div {:data-toggle "tooltip" :title subroles-tooltip}
+            (render/binary-radio
+              "subroles"
+              (path "multiple-subroles")
+              (path "subroles")
+              "Did your work involve multiple subroles?"
+              multiple-subroles)]
+           (subroles req)
+           render/submit-hidden])))))
 
 (htmx/defcomponent legal-role-modal [req]
   (render/modal-large
@@ -112,12 +128,7 @@
     (legal-role-body req)
     [:div {:style "width: 100%"}
      ;; todo when editing only
-     #_[:button.btn.btn-primary
-        {:type "button"
-         :hx-delete "legal-role-body"
-         :hx-target (hash "legal-role-body")
-         :hx-include (render/include-all (path "legal-role-body"))}
-        "Delete"]
+     [:div {:id (path "delete") :style "display: none"}]
      [:button.btn.btn-primary.float-right
       {:id (path "save-button")
        :type "button"

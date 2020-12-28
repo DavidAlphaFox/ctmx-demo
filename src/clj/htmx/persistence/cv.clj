@@ -1,4 +1,6 @@
-(ns htmx.persistence.cv)
+(ns htmx.persistence.cv
+  (:require
+    [htmx.util :as util]))
 
 (def areasOfWork
   (sort
@@ -109,6 +111,15 @@
         :to-row {:present "on"}},
         :location "a",
         :multiple-subroles "false",
+       :subroles {:details "b"}}
+      {:title "c",
+       :company "d",
+       :period-selector
+       {:from-month "Not Specified",
+        :from-year "1960",
+        :to-row {:present "on"}},
+        :location "a",
+        :multiple-subroles "false",
        :subroles {:details "b"}}],
      :previousRoles [],
      :admissions [],
@@ -118,4 +129,7 @@
 
 (defn add-legal-role [role]
   (swap! cv update :previousLegalRoles conj role))
-
+(defn insert-legal-role [i role]
+  (swap! cv assoc-in [:previousLegalRoles i] role))
+(defn remove-legal-role [i]
+  (swap! cv update :previousLegalRoles util/dissoc-i i))

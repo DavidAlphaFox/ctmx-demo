@@ -1,13 +1,13 @@
 (ns htmx.routes.demo
   (:require
-    [clj-htmx.core :as htmx]
+    [ctmx.core :as ctmx]
     [htmx.render :as render]))
 
-(htmx/defcomponent ^:endpoint hello [req my-name]
+(ctmx/defcomponent ^:endpoint hello [req my-name]
   [:div#hello "Hello " my-name])
 
 (defn demo-routes []
-  (htmx/make-routes
+  (ctmx/make-routes
     "/demo"
     (fn [req]
       (render/html5-response

@@ -1,8 +1,8 @@
 (ns htmx.routes.home
   (:require
-    [clj-htmx.core :as htmx]
-    [clj-htmx.form :as form]
-    [clj-htmx.response :as response]
+    [ctmx.core :as ctmx]
+    [ctmx.form :as form]
+    [ctmx.response :as response]
     [htmx.persistence.cv :as persistence.cv]
     [htmx.render :as render]
     [htmx.render.period-selector :as period-selector]
@@ -15,12 +15,12 @@
       (update :num-subroles #(-> % Integer/parseInt dec))))
 
 (defn remove-subrole-params [params]
-  (if-let [to-remove (-> params :remove-subrole htmx/parse-int)]
+  (if-let [to-remove (-> params :remove-subrole ctmx/parse-int)]
     (form/apply-params params remove-subrole to-remove)
     params))
 
-(htmx/defcomponent ^:endpoint subroles [req]
-  (htmx/update-params
+(ctmx/defcomponent ^:endpoint subroles [req]
+  (ctmx/update-params
     remove-subrole-params
     (let [multiple-subroles ^:boolean (value "../multiple-subroles")
           num-subroles (or ^:int (value "/num-subroles") 2)
@@ -31,7 +31,7 @@
          [:h4 "Subroles"]
          [:p "Please provide at least two subroles."]
          [:input {:type "hidden" :name "num-subroles" :value num-subroles}]
-         (htmx/map-range period-selector/subrole-selector req num-subroles)
+         (ctmx/map-range period-selector/subrole-selector req num-subroles)
          [:br]
          [:button.btn.btn-primary
           {:type "button"
@@ -62,12 +62,12 @@
     (form/apply-params params insert-cv index)
     params))
 
-(htmx/defcomponent ^:endpoint legal-role-body [req ^:boolean multiple-subroles ^:int index]
-  (htmx/update-params
+(ctmx/defcomponent ^:endpoint legal-role-body [req ^:boolean multiple-subroles ^:int index]
+  (ctmx/update-params
     #(insert-cv-params index req %)
     (case (:request-method req)
       :post
-      (let [role (-> htmx/*params*
+      (let [role (-> ctmx/*params*
                      form/json-params-pruned
                      (dissoc :index))]
         (if index
@@ -121,26 +121,22 @@
            (subroles req)
            render/submit-hidden])))))
 
-(htmx/defcomponent legal-role-modal [req]
+(ctmx/defcomponent legal-role-modal [req]
   (render/modal-large
     "newLegalRole"
     "Legal Role"
     (legal-role-body req)
     [:div {:style "width: 100%"}
      ;; todo when editing only
-     [:div {:id (path "delete") :style "display: none"}]
-     [:button.btn.btn-primary.float-right
-      {:id (path "save-button")
-       :type "button"
-       :onclick (render/submit (path "legal-role-body"))}
-      "Save"]]))
+     (render/placeholder (path "delete"))
+     (render/placeholder (path "save-button"))]))
 
 (defn- subrole-disp [s]
   [:li (pr-str s)])
 (defn- detail-disp [s]
   [:li s])
 
-(htmx/defcomponent legal-role [req i r]
+(ctmx/defcomponent legal-role [req i r]
   (let [{:keys [period-selector subroles]} r
         {:keys [from-month from-year to-row]} period-selector
         from (if (= "Not Specified" from-month)
@@ -165,7 +161,7 @@
       (if-let [details (:details subroles)]
         (->> details render/para-split (map detail-disp)))]]))
 
-(htmx/defcomponent cv [req]
+(ctmx/defcomponent cv [req]
   (let [{:keys [previousLegalRoles]} (cv/get-cv)]
     [:div.mt-3
      [:h4 "Legal Roles"]
@@ -180,10 +176,10 @@
       "Add"]
      [:br]
      [:br]
-     (htmx/map-indexed legal-role req previousLegalRoles)]))
+     (ctmx/map-indexed legal-role req previousLegalRoles)]))
 
 (defn home-routes []
-  (htmx/make-routes
+  (ctmx/make-routes
     "/"
     (fn [req]
       (render/html5-response

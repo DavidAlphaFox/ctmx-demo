@@ -32,7 +32,7 @@
                  [ring/ring-core "1.8.2"]
                  [ring/ring-defaults "0.3.2"]
                  [selmer "1.12.31"]
-                 [clj-htmx "0.1.0-SNAPSHOT"]]
+                 [ctmx "0.1.0-SNAPSHOT"]]
 
   :min-lein-version "2.0.0"
 

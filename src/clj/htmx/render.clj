@@ -85,15 +85,15 @@
   [:div {:style "margin-top: 15px"}
    [:label label]
    [:div.m-2
-    [:input {:endpoint endpoint
-             :target (str "#" target)
+    [:input {:hx-get endpoint
+             :hx-target (str "#" target)
              :type "radio"
              :name name
              :checked value
              :value "true"} "Yes"]]
    [:div.m-2
-    [:input {:endpoint endpoint
-             :target (str "#" target)
+    [:input {:hx-get endpoint
+             :hx-target (str "#" target)
              :type "radio"
              :name name
              :checked (not value)
@@ -102,3 +102,5 @@
 (def include-all #(format "#%s *" %))
 
 (def para-split #(.split % "\n\n|●"))
+(defn placeholder [id]
+  [:div {:id id :style "display: none"}])

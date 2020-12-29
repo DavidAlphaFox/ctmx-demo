@@ -1,6 +1,6 @@
 (ns htmx.render.period-selector
   (:require
-    [clj-htmx.core :as htmx]
+    [ctmx.core :as ctmx]
     [htmx.render :as render]
     [htmx.util :as util]))
 
@@ -50,7 +50,7 @@
                "December"))
 (def months-not-specified (conj months "Not Specified"))
 
-(htmx/defcomponent ^:endpoint to-row [req ^:boolean present]
+(ctmx/defcomponent ^:endpoint to-row [req ^:boolean present]
   [:div.row {:style "margin-top: 15px" :id id}
    [:div.col
     [:label "To Month"]
@@ -65,18 +65,18 @@
     [:select.custom-select
      {:disabled present :required true :name (path "to-month")}
      [:option {:value ""} "Please Select"]
-     (htmx/forall [option months-not-specified]
+     (ctmx/forall [option months-not-specified]
                   [:option {:value option :selected (= option (value "to-month"))} option])]]
    (number "To Year" (path "to-year") (value "to-year") present)])
 
-(htmx/defcomponent period-selector [req]
+(ctmx/defcomponent period-selector [req]
   [:div
    [:div.row {:style "margin-top: 15px"}
     (select "From Month" (path "from-month") months-not-specified (value "from-month"))
     (number "From Year" (path "from-year") (value "from-year") false)]
    (to-row req (value "to-row_present"))])
 
-(htmx/defcomponent subrole-selector [req k]
+(ctmx/defcomponent subrole-selector [req k]
   (let [details-label "Details.  Paragraphs separated with a blank line become bullet points."]
     [:div
      (when (> k 1)

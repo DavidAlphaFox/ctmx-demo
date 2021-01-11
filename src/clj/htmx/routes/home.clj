@@ -3,6 +3,7 @@
     [ctmx.core :as ctmx]
     [ctmx.form :as form]
     [ctmx.response :as response]
+    [ctmx.rt :as rt]
     [htmx.persistence.cv :as persistence.cv]
     [htmx.render :as render]
     [htmx.render.period-selector :as period-selector]
@@ -15,7 +16,7 @@
       (update :num-subroles #(-> % Integer/parseInt dec))))
 
 (defn remove-subrole-params [params]
-  (if-let [to-remove (-> params :remove-subrole ctmx/parse-int)]
+  (if-let [to-remove (-> params :remove-subrole rt/parse-int)]
     (form/apply-params params remove-subrole to-remove)
     params))
 
@@ -31,7 +32,7 @@
          [:h4 "Subroles"]
          [:p "Please provide at least two subroles."]
          [:input {:type "hidden" :name "num-subroles" :value num-subroles}]
-         (ctmx/map-range period-selector/subrole-selector req num-subroles)
+         (rt/map-range period-selector/subrole-selector req num-subroles)
          [:br]
          [:button.btn.btn-primary
           {:type "button"
@@ -67,7 +68,7 @@
     #(insert-cv-params index req %)
     (case (:request-method req)
       :post
-      (let [role (-> ctmx/*params*
+      (let [role (-> rt/*params*
                      form/json-params-pruned
                      (dissoc :index))]
         (if index
@@ -81,14 +82,14 @@
       (let [title-tooltip "If you held multiple titles, please list the final / most senior position."
             subroles-tooltip "Multiple subroles may be due to holding various positions with one employer, or it may be due to multiple customer placements as a flexible legal consultant."]
         (list
-          (when hx-request?
+          (when top-level?
             [:button.btn.btn-primary.float-right
              {:id (path "../save-button")
               :type "button"
               :onclick (render/submit (path "."))
               :hx-swap-oob "true"}
              (if index "Update" "Save")])
-          (when hx-request?
+          (when top-level?
             (if index
               [:button.btn.btn-primary
                {:id (path "../delete")
@@ -176,7 +177,7 @@
       "Add"]
      [:br]
      [:br]
-     (ctmx/map-indexed legal-role req previousLegalRoles)]))
+     (rt/map-indexed legal-role req previousLegalRoles)]))
 
 (defn home-routes []
   (ctmx/make-routes

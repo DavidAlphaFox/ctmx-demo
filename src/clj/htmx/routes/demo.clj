@@ -3,7 +3,7 @@
     [ctmx.core :as ctmx]
     [htmx.render :as render]))
 
-(ctmx/defcomponent ^:endpoint hello [req my-name]
+(ctmx/defcomponent ^:endpoint hello [req ^:simple my-name]
   [:div#hello "Hello " my-name])
 
 (defn demo-routes []

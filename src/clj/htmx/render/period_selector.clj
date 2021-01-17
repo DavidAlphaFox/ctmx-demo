@@ -56,17 +56,21 @@
     [:label "To Month"]
     [:input.form-check.form-check-inline.ml-2
      {:hx-get "to-row"
-      :hx-target (str "#" id)
+      :hx-target (hash ".")
       :hx-include (render/include-all id)
       :type "checkbox"
       :checked present
       :name (path "present")}]
     "Present"
+    (when present ;; need to include this instead
+      [:input {:type "hidden" :name (path "to-month") :value (value "to-month")}])
     [:select.custom-select
      {:disabled present :required true :name (path "to-month")}
      [:option {:value ""} "Please Select"]
      (ctmx/forall [option months-not-specified]
                   [:option {:value option :selected (= option (value "to-month"))} option])]]
+   (when present ;; need to include this instead
+     [:input {:type "hidden" :name (path "to-year") :value (value "to-year")}])
    (number "To Year" (path "to-year") (value "to-year") present)])
 
 (ctmx/defcomponent period-selector [req]

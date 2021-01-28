@@ -67,8 +67,8 @@
     [:select.custom-select
      {:disabled present :required true :name (path "to-month")}
      [:option {:value ""} "Please Select"]
-     (ctmx/forall [option months-not-specified]
-                  [:option {:value option :selected (= option (value "to-month"))} option])]]
+     (for [option months-not-specified]
+       [:option {:value option :selected (= option (value "to-month"))} option])]]
    (when present ;; need to include this instead
      [:input {:type "hidden" :name (path "to-year") :value (value "to-year")}])
    (number "To Year" (path "to-year") (value "to-year") present)])

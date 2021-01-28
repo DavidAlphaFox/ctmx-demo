@@ -15,14 +15,14 @@
       (update-in [:cv :legal-role-modal :legal-role-body :subroles] util/dissoc-i to-remove)
       (update :num-subroles #(-> % Integer/parseInt dec))))
 
-(defn remove-subrole-params [params]
+(defn remove-subrole-params [params _]
   (if-let [to-remove (-> params :remove-subrole rt/parse-int)]
     (form/apply-params params remove-subrole to-remove)
     params))
 
 (ctmx/defcomponent ^:endpoint subroles [req]
   (ctmx/update-params
-    remove-subrole-params
+    req remove-subrole-params
     (let [multiple-subroles ^:boolean (value "../multiple-subroles")
           num-subroles (or ^:int (value "/num-subroles") 2)
           add-subrole ^:boolean (value "/add-subrole")
@@ -65,10 +65,11 @@
 
 (ctmx/defcomponent ^:endpoint legal-role-body [req ^:boolean multiple-subroles ^:int index]
   (ctmx/update-params
-    #(insert-cv-params index req %)
+    req (fn [params _] (insert-cv-params index req params))
     (case (:request-method req)
       :post
-      (let [role (-> rt/*params*
+      (let [role (-> req
+                     :params
                      form/json-params-pruned
                      (dissoc :index))]
         (if index

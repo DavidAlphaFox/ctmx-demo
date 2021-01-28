@@ -4,6 +4,7 @@
     [htmx.nrepl :as nrepl]
     [luminus.http-server :as http]
     [htmx.config :refer [env]]
+    [ctmx.rt :as rt]
     [clojure.tools.cli :refer [parse-opts]]
     [clojure.tools.logging :as log]
     [mount.core :as mount])
@@ -25,7 +26,7 @@
   :start
   (http/start
     (-> env
-        (update :io-threads #(or % (* 2 (.availableProcessors (Runtime/getRuntime))))) 
+        (update :io-threads #(or % (* 2 (.availableProcessors (Runtime/getRuntime)))))
         (assoc  :handler (handler/app))
         (update :port #(or (-> env :options :port) %))
         (select-keys [:handler :host :port])))
@@ -48,6 +49,7 @@
   (shutdown-agents))
 
 (defn start-app [args]
+  (rt/set-param-method! :path)
   (doseq [component (-> args
                         (parse-opts cli-options)
                         mount/start-with-args

@@ -13,10 +13,10 @@
 (defn remove-subrole [params to-remove]
   (-> params
       (update-in [:cv :legal-role-modal :legal-role-body :subroles] util/dissoc-i to-remove)
-      (update :num-subroles #(-> % Integer/parseInt dec))))
+      (update :num-subroles #(-> % Long/parseLong dec))))
 
 (defn remove-subrole-params [params _]
-  (if-let [to-remove (-> params :remove-subrole rt/parse-int)]
+  (if-let [to-remove (-> params :remove-subrole rt/parse-long)]
     (form/apply-params params remove-subrole to-remove)
     params))
 

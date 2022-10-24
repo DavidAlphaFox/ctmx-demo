@@ -49,7 +49,6 @@
   (shutdown-agents))
 
 (defn start-app [args]
-  (rt/set-param-method! :path)
   (doseq [component (-> args
                         (parse-opts cli-options)
                         mount/start-with-args

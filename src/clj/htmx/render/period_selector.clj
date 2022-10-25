@@ -80,7 +80,7 @@
     (number "From Year" (path "from-year") (value "from-year") false)]
    (to-row req (value "to-row_present"))])
 
-(ctmx/defcomponent subrole-selector [req k]
+(ctmx/defcomponent subrole-selector [req k _]
   (let [details-label "Details.  Paragraphs separated with a blank line become bullet points."]
     [:div
      (when (> k 1)
@@ -90,7 +90,7 @@
          :hx-target (hash "../..")
          :hx-vals (util/write-str {:remove-subrole k})}
         "Remove Subrole"])
-     [:div.row
+     [:div.row.mt-2
       (text "Subrole" (path "title") (value "title") true)]
      (period-selector req)
      [:div.row.mt-2

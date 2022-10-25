@@ -32,7 +32,7 @@
          [:h4 "Subroles"]
          [:p "Please provide at least two subroles."]
          [:input {:type "hidden" :name "num-subroles" :value num-subroles}]
-         (rt/map-range period-selector/subrole-selector req num-subroles)
+         (rt/map-indexed period-selector/subrole-selector req (range num-subroles))
          [:br]
          [:button.btn.btn-primary
           {:type "button"
@@ -141,10 +141,14 @@
 (defcomponent legal-role [req i r]
   (let [{:keys [period-selector subroles]} r
         {:keys [from-month from-year to-row]} period-selector
+        {:keys [present to-month to-year]} to-row
         from (if (= "Not Specified" from-month)
                from-year
                (str from-month " " from-year))
-        to (if (:present to-row) "Present" "todo")]
+        to (cond
+            present "Present"
+            (= "Not Specified" to-month) to-year
+            :else (str to-month " " to-year))]
     [:div
      [:button.btn.btn-primary.float-right
       {:type "button"

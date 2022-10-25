@@ -4,7 +4,7 @@
     [htmx.nrepl :as nrepl]
     [luminus.http-server :as http]
     [htmx.config :refer [env]]
-    [ctmx.rt :as rt]
+    ctmx.config
     [clojure.tools.cli :refer [parse-opts]]
     [clojure.tools.logging :as log]
     [mount.core :as mount])
@@ -49,6 +49,7 @@
   (shutdown-agents))
 
 (defn start-app [args]
+  (ctmx.config/set-param-method! :path)
   (doseq [component (-> args
                         (parse-opts cli-options)
                         mount/start-with-args

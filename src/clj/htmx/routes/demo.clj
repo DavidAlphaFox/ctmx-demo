@@ -1,6 +1,6 @@
 (ns htmx.routes.demo
   (:require
-    [ctmx.core :as ctmx]
+    [ctmx.core :as ctmx :refer [defcomponent]]
     [ctmx.form :as form]
     [ctmx.response :as response]
     [ctmx.rt :as rt]
@@ -20,11 +20,11 @@
     (form/apply-params params remove-subrole to-remove)
     params))
 
-(ctmx/defcomponent ^:endpoint subroles [req]
+(defcomponent ^:endpoint subroles [req]
   (ctmx/update-params
     req remove-subrole-params
     (let [multiple-subroles ^:boolean (value "../multiple-subroles")
-          num-subroles (or ^:int (value "/num-subroles") 2)
+          num-subroles (or ^:long (value "/num-subroles") 2)
           add-subrole ^:boolean (value "/add-subrole")
           num-subroles (if add-subrole (inc num-subroles) num-subroles)]
       (if multiple-subroles
@@ -63,7 +63,7 @@
     (form/apply-params params insert-cv index)
     params))
 
-(ctmx/defcomponent ^:endpoint legal-role-body [req ^:boolean multiple-subroles ^:int index]
+(defcomponent ^:endpoint legal-role-body [req ^:boolean multiple-subroles ^:long-option index]
   (ctmx/update-params
     req (fn [params _] (insert-cv-params index req params))
     (case (:request-method req)
@@ -123,7 +123,7 @@
            (subroles req)
            render/submit-hidden])))))
 
-(ctmx/defcomponent legal-role-modal [req]
+(defcomponent legal-role-modal [req]
   (render/modal-large
     "newLegalRole"
     "Legal Role"
@@ -138,7 +138,7 @@
 (defn- detail-disp [s]
   [:li s])
 
-(ctmx/defcomponent legal-role [req i r]
+(defcomponent legal-role [req i r]
   (let [{:keys [period-selector subroles]} r
         {:keys [from-month from-year to-row]} period-selector
         from (if (= "Not Specified" from-month)
@@ -163,7 +163,7 @@
       (if-let [details (:details subroles)]
         (->> details render/para-split (map detail-disp)))]]))
 
-(ctmx/defcomponent cv [req]
+(defcomponent cv [req]
   (let [{:keys [previousLegalRoles]} (cv/get-cv)]
     [:div.mt-3
      [:h4 "Legal Roles"]

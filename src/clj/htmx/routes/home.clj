@@ -1,9 +1,9 @@
 (ns htmx.routes.home
   (:require
-    [ctmx.core :as ctmx]
+    [ctmx.core :as ctmx :refer [defcomponent]]
     [htmx.render :as render]))
 
-(ctmx/defcomponent ^:endpoint hello [req ^:simple my-name]
+(defcomponent ^:endpoint hello [req ^:simple my-name]
   [:div#hello "Hello " my-name])
 
 (defn home-routes []

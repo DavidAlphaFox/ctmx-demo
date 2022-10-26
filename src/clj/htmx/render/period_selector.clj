@@ -1,8 +1,7 @@
 (ns htmx.render.period-selector
   (:require
     [ctmx.core :as ctmx]
-    [htmx.render :as render]
-    [htmx.util :as util]))
+    [htmx.render :as render]))
 
 (defn- select [label name options selected]
   [:div.col
@@ -88,7 +87,7 @@
         {:type "button"
          :hx-patch "subroles"
          :hx-target (hash "../..")
-         :hx-vals (util/write-str {:remove-subrole k})}
+         :hx-vals {:remove-subrole k}}
         "Remove Subrole"])
      [:div.row.mt-2
       (text "Subrole" (path "title") (value "title") true)]

@@ -1,6 +1,6 @@
 (ns htmx.render
   (:require
-    [hiccup.core :as hiccup]
+    ctmx.render
     [hiccup.page :refer [html5]]
     [htmx.util :as util]
     [ring.util.http-response :refer [no-content]]))
@@ -12,7 +12,7 @@
 
 (defn snippet-response [body]
   (if body
-    (-> body hiccup/html html-response)
+    (-> body ctmx.render/html html-response)
     (no-content)))
 
 (defn html5-response
@@ -29,7 +29,7 @@
                 :href "https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
                 :integrity "sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
                 :crossorigin "anonymous"}]]
-       [:body body]
+       [:body (ctmx.render/walk-attrs body)]
        [:script {:src "https://code.jquery.com/jquery-3.5.1.slim.min.js"
                  :integrity "sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
                  :crossorigin "anonymous"}]

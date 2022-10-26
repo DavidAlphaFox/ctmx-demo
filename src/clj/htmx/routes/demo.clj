@@ -4,7 +4,6 @@
     [ctmx.form :as form]
     [ctmx.response :as response]
     [ctmx.rt :as rt]
-    [htmx.persistence.cv :as persistence.cv]
     [htmx.render :as render]
     [htmx.render.period-selector :as period-selector]
     [htmx.service.cv :as cv]
@@ -24,13 +23,13 @@
   (ctmx/update-params
     req remove-subrole-params
     (let [multiple-subroles ^:boolean (value "../multiple-subroles")
-          num-subroles (or ^:long (value "/num-subroles") 2)
+          num-subroles (or ^:long (value "/num-subroles") 1)
           add-subrole ^:boolean (value "/add-subrole")
           num-subroles (if add-subrole (inc num-subroles) num-subroles)]
       (if multiple-subroles
         [:div {:id id}
          [:h4 "Subroles"]
-         [:p "Please provide at least two subroles."]
+         [:p "Please provide at least one subrole."]
          [:input {:type "hidden" :name "num-subroles" :value num-subroles}]
          (rt/map-indexed period-selector/subrole-selector req (range num-subroles))
          [:br]
@@ -38,7 +37,7 @@
           {:type "button"
            :hx-patch "subroles"
            :hx-target (hash ".")
-           :hx-vals (util/write-str {:add-subrole true})}
+           :hx-vals {:add-subrole true}}
           "Add Subrole"]]
         [:div {:id id :style "margin-top: 15px"}
          [:label "Please provide details on this legal role and some brief examples of your past transactions/deals, technical details, levels of responsibility and key customers (where possible)."]
@@ -62,7 +61,7 @@
         (= :get request-method))
     (form/apply-params params insert-cv index)
     params))
-
+(use 'clojure.pprint)
 (defcomponent ^:endpoint legal-role-body [req ^:boolean multiple-subroles ^:long-option index]
   (ctmx/update-params
     req (fn [params _] (insert-cv-params index req params))
@@ -70,8 +69,10 @@
       :post
       (let [role (-> req
                      :params
+                     (dissoc :num-subroles)
                      form/json-params-pruned
                      (dissoc :index))]
+        (pprint role)
         (if index
           (cv/insert-legal-role index role)
           (cv/add-legal-role role))
@@ -97,7 +98,7 @@
                 :type "button"
                 :hx-delete "legal-role-body"
                 :hx-target (hash ".")
-                :hx-vals (util/write-str {(path "index") index})
+                :hx-vals {(path "index") index}
                 :hx-confirm "Delete?"
                 :hx-swap-oob "true"}
                "Delete"]
@@ -154,8 +155,7 @@
       {:type "button"
        :hx-get "legal-role-body"
        :hx-target (hash "../../legal-role-modal/legal-role-body")
-       :hx-vals (util/write-str
-                  {(path "../../legal-role-modal/legal-role-body/index") i})
+       :hx-vals {(path "../../legal-role-modal/legal-role-body/index") i}
        :data-toggle "modal"
        :data-target "#newLegalRole"}
       "Edit"]

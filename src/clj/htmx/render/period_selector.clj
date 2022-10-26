@@ -78,29 +78,3 @@
     (select "From Month" (path "from-month") months-not-specified (value "from-month"))
     (number "From Year" (path "from-year") (value "from-year") false)]
    (to-row req (value "to-row_present"))])
-
-(ctmx/defcomponent subrole-selector [req k _]
-  (let [details-label "Details.  Paragraphs separated with a blank line become bullet points."]
-    [:div
-     (when (> k 1)
-       [:button.btn.btn-primary.my-2
-        {:type "button"
-         :hx-patch "subroles"
-         :hx-target (hash "../..")
-         :hx-vals {:remove-subrole k}}
-        "Remove Subrole"])
-     [:div.row.mt-2
-      (text "Subrole" (path "title") (value "title") true)]
-     (period-selector req)
-     [:div.row.mt-2
-      (text "Location (optional)" (path "location") (value "location") false)]
-     [:div {:style "margin-top: 15px"}
-      [:label "Please provide details on this legal subrole and some brief examples of your past
-       transactions/deals, technical details, levels of responsibility and key customers (where
-       possible)."]
-      [:label "Paragraphs separated with a blank line become bullet points."]
-      [:textarea.form-control
-       {:placeholder details-label
-        :name (path "details")
-        :rows 6}
-       (value "details")]]]))

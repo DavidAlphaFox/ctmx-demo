@@ -9,6 +9,32 @@
     [htmx.service.cv :as cv]
     [htmx.util :as util]))
 
+(ctmx/defcomponent subrole-selector [req k _]
+  (let [details-label "Details.  Paragraphs separated with a blank line become bullet points."]
+    [:div
+     (when (pos? k)
+           [:button.btn.btn-primary.my-2
+            {:type "button"
+             :hx-patch "subroles"
+             :hx-target (hash "../..")
+             :hx-vals {:remove-subrole k}}
+            "Remove Subrole"])
+     [:div.row.mt-2
+      (period-selector/text "Subrole" (path "title") (value "title") true)]
+     (period-selector/period-selector req)
+     [:div.row.mt-2
+      (period-selector/text "Location (optional)" (path "location") (value "location") false)]
+     [:div {:style "margin-top: 15px"}
+      [:label "Please provide details on this legal subrole and some brief examples of your past
+       transactions/deals, technical details, levels of responsibility and key customers (where
+       possible)."]
+      [:label "Paragraphs separated with a blank line become bullet points."]
+      [:textarea.form-control
+       {:placeholder details-label
+        :name (path "details")
+        :rows 6}
+       (value "details")]]]))
+
 (defn remove-subrole [params to-remove]
   (-> params
       (update-in [:cv :legal-role-modal :legal-role-body :subroles] util/dissoc-i to-remove)
@@ -23,15 +49,15 @@
   (ctmx/update-params
     req remove-subrole-params
     (let [multiple-subroles ^:boolean (value "../multiple-subroles")
-          num-subroles (or ^:long (value "/num-subroles") 1)
+          num-subroles (or ^:long (value "num-subroles") 1)
           add-subrole ^:boolean (value "/add-subrole")
           num-subroles (if add-subrole (inc num-subroles) num-subroles)]
       (if multiple-subroles
         [:div {:id id}
          [:h4 "Subroles"]
          [:p "Please provide at least one subrole."]
-         [:input {:type "hidden" :name "num-subroles" :value num-subroles}]
-         (rt/map-indexed period-selector/subrole-selector req (range num-subroles))
+         [:input {:type "hidden" :name (path "num-subroles") :value num-subroles}]
+         (rt/map-indexed subrole-selector req (range num-subroles))
          [:br]
          [:button.btn.btn-primary
           {:type "button"
@@ -54,13 +80,13 @@
     (assoc-in params [:cv :legal-role-modal :legal-role-body]
               (assoc to-insert :index index))
     params))
-
 (defn insert-cv-params [index {:keys [request-method]} params]
   (if (and
         index
         (= :get request-method))
     (form/apply-params params insert-cv index)
     params))
+
 (use 'clojure.pprint)
 (defcomponent ^:endpoint legal-role-body [req ^:boolean multiple-subroles ^:long-option index]
   (ctmx/update-params
@@ -69,7 +95,6 @@
       :post
       (let [role (-> req
                      :params
-                     (dissoc :num-subroles)
                      form/json-params-pruned
                      (dissoc :index))]
         (pprint role)
@@ -97,7 +122,6 @@
                {:id (path "../delete")
                 :type "button"
                 :hx-delete "legal-role-body"
-                :hx-target (hash ".")
                 :hx-vals {(path "index") index}
                 :hx-confirm "Delete?"
                 :hx-swap-oob "true"}
@@ -167,22 +191,30 @@
       (if-let [details (:details subroles)]
         (->> details render/para-split (map detail-disp)))]]))
 
-(defcomponent cv [req]
-  (let [{:keys [previousLegalRoles]} (cv/get-cv)]
-    [:div.mt-3
-     [:h4 "Legal Roles"]
-     (legal-role-modal req)
-     [:button.btn.btn-primary.float-right
-      {:type "button"
-       :hx-get "legal-role-body"
-       :hx-target (hash "legal-role-modal/legal-role-body")
-       :data-toggle "modal"
-       :data-target "#newLegalRole"
-       :title "Please add Legal Role"}
-      "Add"]
-     [:br]
-     [:br]
-     (rt/map-indexed legal-role req previousLegalRoles)]))
+(defcomponent ^:endpoint cv [req]
+  (case (:request-method req)
+        :delete
+        (do
+          (cv/cv-reset!)
+          response/hx-refresh)
+        (let [{:keys [previousLegalRoles]} (cv/get-cv)]
+          [:div.mt-3
+           [:h4 "Legal Roles"]
+           [:button.btn.btn-primary
+            {:type "button"
+             :hx-delete "cv"} "Reset"]
+           (legal-role-modal req)
+           [:button.btn.btn-primary.float-right
+            {:type "button"
+             :hx-get "legal-role-body"
+             :hx-target (hash "legal-role-modal/legal-role-body")
+             :data-toggle "modal"
+             :data-target "#newLegalRole"
+             :title "Please add Legal Role"}
+            "Add"]
+           [:br]
+           [:br]
+           (rt/map-indexed legal-role req previousLegalRoles)])))
 
 (defn demo-routes []
   (ctmx/make-routes

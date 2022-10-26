@@ -91,41 +91,44 @@
    "Managing Consultant",
    "Legal Director"])
 
-(def cv
-  (atom
-    {:country "",
-     :countryOther "",
-     :summary "",
-     :areasOfWork [],
-     :industries [],
-     :areasOfWorkTop3 [],
-     :industryTop3 [],
-     :areasOfWorkFuture [],
-     :industryFuture [],
-     :previousLegalRoles
-     [{:title "a",
-       :company "b",
-       :period-selector
-       {:from-month "Not Specified",
-        :from-year "1960",
-        :to-row {:present "on"}},
-        :location "a",
-        :multiple-subroles "false",
-       :subroles {:details "b"}}
-      {:title "c",
-       :company "d",
-       :period-selector
-       {:from-month "Not Specified",
-        :from-year "1960",
-        :to-row {:present "on"}},
-        :location "a",
-        :multiple-subroles "false",
-       :subroles {:details "b"}}],
-     :previousRoles [],
-     :admissions [],
-     :qualifications [],
-     :languages [],
-     :interests ""}))
+(def cv-raw
+ {:country "",
+  :countryOther "",
+  :summary "",
+  :areasOfWork [],
+  :industries [],
+  :areasOfWorkTop3 [],
+  :industryTop3 [],
+  :areasOfWorkFuture [],
+  :industryFuture [],
+  :previousLegalRoles
+  [{:title "a",
+    :company "b",
+    :period-selector
+    {:from-month "Not Specified",
+     :from-year "1960",
+     :to-row {:present "on"}},
+    :location "a",
+    :multiple-subroles "false",
+    :subroles {:details "b"}}
+   {:title "c",
+    :company "d",
+    :period-selector
+    {:from-month "Not Specified",
+     :from-year "1960",
+     :to-row {:present "on"}},
+    :location "a",
+    :multiple-subroles "false",
+    :subroles {:details "b"}}],
+  :previousRoles [],
+  :admissions [],
+  :qualifications [],
+  :languages [],
+  :interests ""})
+
+(def cv (atom cv-raw))
+(defn cv-reset! []
+ (reset! cv cv-raw))
 
 (defn add-legal-role [role]
   (swap! cv update :previousLegalRoles conj role))
